@@ -1,9 +1,17 @@
 package nl.jessevogel.photomanager.data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Person {
 
     public int id;
     public String name;
+    public Set<Picture> pictures;
+
+    public Person() {
+        pictures = new HashSet<>();
+    }
 
     public String serialize() {
         return "" + id + "," + name;

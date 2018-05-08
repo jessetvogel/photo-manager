@@ -6,8 +6,17 @@ public class Main {
         // Create controller object
         Controller controller = new Controller();
 
+        // Load data
+        controller.getData().loadData();
+
+        // Start API server
+        controller.getAPIServer().start();
+
         // Read commands
         controller.getCommands().read();
+
+        // Stop API server
+        controller.getAPIServer().stop();
     }
 
 }

@@ -2,15 +2,16 @@ package nl.jessevogel.photomanager;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.Tag;
+import com.drew.metadata.xmp.XmpDirectory;
 import nl.jessevogel.photomanager.data.Album;
+import nl.jessevogel.photomanager.data.Person;
 import nl.jessevogel.photomanager.data.Picture;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 class Scanner {
 
@@ -36,8 +37,6 @@ class Scanner {
         data.getAlbums().clear();
         data.getPeople().clear();
         data.getPictures().clear();
-        data.getAlbumPictureConnections().clear();
-        data.getPersonPictureConnections().clear();
 
         // Scan the root directory
         return scanDirectory(directory);
@@ -101,14 +100,26 @@ class Scanner {
         picture.id = controller.getData().getPictures().size(); // TODO
         picture.albumId = album.id;
         picture.filename = file.getName();
+        album.pictures.add(picture);
         controller.getData().getPictures().add(picture);
 
-        // Look for people in metadata
         try {
+            // Look for people in metadata
             Metadata metadata = ImageMetadataReader.readMetadata(file);
-            for (Directory directory : metadata.getDirectories()) {
-                for (Tag tag : directory.getTags()) {
-                    System.out.println(picture.filename + ": " + tag);
+            for (XmpDirectory xmpDirectory : metadata.getDirectoriesOfType(XmpDirectory.class)) {
+                for(Map.Entry<String, String> entry : xmpDirectory.getXmpProperties().entrySet()) {
+                    if(!entry.getKey().endsWith("mwg-rs:Name")) continue;
+
+                    // Find corresponding person (create one if does not exist)
+                    String name = entry.getValue();
+                    Person person = controller.getData().getPersonByName(name);
+                    if(person == null) {
+                        person = new Person();
+                        person.id = controller.getData().getPeople().size();
+                        person.name = name;
+                        controller.getData().getPeople().add(person);
+                    }
+                    person.pictures.add(picture);
                 }
             }
         } catch (IOException | ImageProcessingException e) {

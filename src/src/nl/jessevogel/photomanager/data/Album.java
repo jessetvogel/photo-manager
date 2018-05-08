@@ -1,11 +1,18 @@
 package nl.jessevogel.photomanager.data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Album {
 
     public int id;
     public String title;
     public String path;
+    public Set<Picture> pictures;
 
+    public Album() {
+        pictures = new HashSet<>();
+    }
     public String serialize() {
         return "" + id + "," + title + "," + path;
     }
