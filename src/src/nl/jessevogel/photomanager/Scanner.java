@@ -28,6 +28,9 @@ class Scanner {
     }
 
     boolean scan() {
+
+        // TODO: maybe first index everything, and look for metadata later? so that we can update the user on the progress?
+
         // Make sure the current root directory is a directory
         File directory = new File(controller.getData().getRootDirectory());
         if(!directory.exists() || !directory.isDirectory()) return false;
