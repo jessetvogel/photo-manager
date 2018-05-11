@@ -105,7 +105,7 @@ body {
   height: 128px;
 }
 
-.person-picture {
+.person-profile-picture {
   width: 96px;
   height: 96px;
   border-radius: 64px;
@@ -120,7 +120,7 @@ body {
   margin-left: 16px;
 }
 
-.person-photos {
+.person-pictures {
   max-width: 804px;
   margin-left: auto;
   margin-right: auto;
@@ -129,7 +129,7 @@ body {
   justify-content: center;
 }
 
-.person-photos .photo {
+.person-pictures .picture {
   width: 49%;
   padding-bottom: 49%;
   margin: 0.25%;
@@ -141,7 +141,7 @@ body {
   animation: scaleout 0.2s;
 }
 
-.person-photos-end {
+.person-pictures-end {
   max-width: 720px;
   height: 64px;
   margin-left: auto;
@@ -174,7 +174,7 @@ body {
   width: 128px;
   height: 128px;
   border-radius: 64px;
-  background-image: url('../img/person-default.png');
+  background-image: url('../img/profile-picture-default.png');
   background-size: cover;
   background-position: center;
   margin: 16px;
@@ -232,7 +232,7 @@ body {
   cursor: pointer;
 }
 
-.overlay .photo-large {
+.overlay .picture-large {
   max-width: 95%;
   max-height: 95%;
 }

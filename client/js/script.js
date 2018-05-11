@@ -44,8 +44,8 @@ function loadPeople() {
   content.append(peopleTiles);
   $('#content').html(content);
 
-  // Get list of persons
-  apiPersons(function (data) {
+  // Get list of people
+  apiPeople(function (data) {
     // Clear peopleTiles
     peopleTiles.html('').hide();
 
@@ -53,12 +53,12 @@ function loadPeople() {
     for(var i = 0;i < data.length; ++i) {
       // Set some peopleData
       setPeopleData(data[i].id, 'name', data[i].name);
-      if(data[i].profilePictureUrn == null) setPeopleData(data[i].id, 'picture', false);
+      if(data[i].profilePictureUrn == null) setPeopleData(data[i].id, 'profile-picture', false);
 
       // Set tile content
       var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(data[i].name));
       (function (tile) {
-        loadPersonPicture(data[i].id, function (data) {
+        loadProfilePicture(data[i].id, function (data) {
           tile.css({ backgroundImage: 'url(' + data + ')' });
         });
       })(tile);
@@ -83,15 +83,15 @@ function loadPerson(id) {
   // Construct content
   var content = $('<div>').addClass('content-person');
   var personHeader = $('<div>').addClass('person-header');
-  var personPhotos = $('<div>').addClass('person-photos');
-  var personPhotosEnd = $('<div>').addClass('person-photos-end');
+  var personPictures = $('<div>').addClass('person-pictures');
+  var personPicturesEnd = $('<div>').addClass('person-pictures-end');
 
   // Person header
-  var personPicture = $('<div>').addClass('person-picture');
-  personHeader.append(personPicture);
+  var personProfilePicture = $('<div>').addClass('person-profile-picture');
+  personHeader.append(personProfilePicture);
   personHeader.append($('<div>').addClass('person-name').text(getPeopleData(id, 'name')));
-  loadPersonPicture(id, function (data) {
-    personPicture.css({ backgroundImage: 'url(' + data + ')'});
+  loadProfilePicture(id, function (data) {
+    personProfilePicture.css({ backgroundImage: 'url(' + data + ')'});
   });
 
   // Set interval to check if should load new batch TODO: is there a better way?
@@ -101,70 +101,70 @@ function loadPerson(id) {
       return;
     }
     if(!loadingBatch && checkPersonShouldLoadNewBatch()) {
-      loadPersonPhotoBatch(id, PHOTOS_PER_BATCH);
+      loadPersonPicturesBatch(id, PICTURES_PER_BATCH);
     }
   }, 100);
 
   // Set content
   content.append(personHeader);
-  content.append(personPhotos);
-  content.append(personPhotosEnd);
+  content.append(personPictures);
+  content.append(personPicturesEnd);
   $('#content').html(content);
 
   reachedEndOfPersonFeed = false;
-  loadPersonPhotoBatch(id, PHOTOS_PER_BATCH);
+  loadPersonPicturesBatch(id, PICTURES_PER_BATCH);
 }
 
-var PHOTOS_PER_BATCH = 12;
+var PICTURES_PER_BATCH = 12;
 var loadingBatch = false;
 var reachedEndOfPersonFeed = false;
 
 function checkPersonShouldLoadNewBatch() {
-  return (!reachedEndOfPersonFeed && $('.person-photos-end').offset().top < $('body').height());
+  return (!reachedEndOfPersonFeed && $('.person-pictures-end').offset().top < $('body').height());
 }
 
-function loadPersonPhotoBatch(id, amount) {
+function loadPersonPicturesBatch(id, amount) {
   // Indicate a batch is being loaded
   loadingBatch = true;
 
   // Add loading icon
-  $('.person-photos-end').append($('<div>').addClass('loading'));
+  $('.person-pictures-end').append($('<div>').addClass('loading'));
 
-  // Load photos
-  var start = $('.person-photos .photo').length;
-  apiPersonsPhotosAmount(id, start, amount, function (data) {
-    // Check if any photos were returned
+  // Load pictures
+  var start = $('.person-pictures .picture').length;
+  apiSearch({ people: [ id ] }, start, amount, function (data) {
+    // Check if any pictures were returned
     if(data.pictures.length == 0) {
       reachedEndOfPersonFeed = true;
-      $('.person-photos-end').html($('<span>').addClass('text-end-of-feed').text('~'));
+      $('.person-pictures-end').html($('<span>').addClass('text-end-of-feed').text('~'));
       return;
     }
 
-    // Create photos
+    // Create pictures
     for(var i = 0;i < data.pictures.length; ++i) {
-      // Set photo content
-      var photo = $('<div>').addClass('photo');
+      // Set picture content
+      var picture = $('<div>').addClass('picture');
 
       // Click event
-      (function (photo) {
-        apiPhoto(data.pictures[i].id, 'midi', function (data) {
-          photo.css({ backgroundImage: 'url(' + data + ')'});
-          photo.click(function () {
-            overlay($('<img>').addClass('photo-large').prop('src', data));
+      (function (picture) {
+        apiPicture(data.pictures[i].id, 'midi', function (data) {
+          picture.css({ backgroundImage: 'url(' + data + ')'});
+          picture.click(function () {
+            overlay($('<img>').addClass('picture-large').prop('src', data));
           });
         });
-      })(photo);
+      })(picture);
 
-      // Add to photos
-      $('.person-photos').append(photo);
+      // Add to pictures
+      $('.person-pictures').append(picture);
     }
 
     // Remove loading icon
-    $('.person-photos-end').html('');
+    $('.person-pictures-end').html('');
 
     // Check if a new batch should be loaded
     if(checkPersonShouldLoadNewBatch()) {
-      loadPersonPhotoBatch(id, PHOTOS_PER_BATCH);
+      loadPersonPicturesBatch(id, PICTURES_PER_BATCH);
     }
     else {
       // Indicate no batch is being loaded anymore
@@ -194,26 +194,26 @@ function setPeopleData(id, key, value) {
   peopleData[id][key] = value;
 }
 
-function loadPersonPicture(id, callback) {
-  var pictureData = getPeopleData(id, 'picture');
+function loadProfilePicture(id, callback) {
+  var profilePictureData = getPeopleData(id, 'profile-picture');
 
   // In case this person has no picture
-  if(pictureData == false) {
-    callback('/img/person-default.png');
+  if(profilePictureData == false) {
+    callback('/img/profile-picture-default.png');
     return;
   }
 
   // In case the picture is already loaded
-  if(pictureData != null) {
-    callback(pictureData);
+  if(profilePictureData != null) {
+    callback(profilePictureData);
     return;
   }
 
   // Otherwise, load the picture
   else {
     (function (id, callback) {
-      apiPersonPicture(id, function (data) {
-        setPeopleData(id, 'picture', data);
+      apiProfilePicture(id, function (data) {
+        setPeopleData(id, 'profile-picture', data);
         callback(data);
       });
     })(id, callback);

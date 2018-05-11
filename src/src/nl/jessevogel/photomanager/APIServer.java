@@ -24,8 +24,16 @@ public class APIServer extends HTTPServer {
 
     @Override
     public boolean respond(HTTPRequest request, HTTPResponse response) {
-        String URIPath = request.getURIPath();
+        // CORS
+        String origin = request.getHeader("Origin");
+        if(origin != null) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Methods", "POST, GET");
+            response.setHeader("Access-Control-Allow-Headers", "*");
+        }
 
+        String URIPath = request.getURIPath();
         if (URIPath.equals("/health")) return health(request, response);
         if (URIPath.equals("/people")) return people(request, response);
         if (URIPath.equals("/albums")) return albums(request, response);
@@ -172,7 +180,7 @@ public class APIServer extends HTTPServer {
             if (first) first = false;
             else response.addMessage(",");
             Picture picture = arrayPictures.get(i);
-            response.addMessage("" + picture.id);
+            response.addMessage("{\"id\":" + picture.id + "}");
         }
 
         response.addMessage("]");

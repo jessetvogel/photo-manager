@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class HTTPRequest {
 
-    private static final Pattern patternRequestLine = Pattern.compile("^(GET|POST) (.*) (HTTP\\/1.1)$");
+    private static final Pattern patternRequestLine = Pattern.compile("^(GET|POST|OPTIONS) (.*) (HTTP\\/1.1)$");
     private static final Pattern patternHeader = Pattern.compile("^([\\w\\-]+): (.*)$");
     private static final Pattern patternURI = Pattern.compile("^(\\/.*?)(?:\\?([^=]+=[^=]+(?:&[^=]+=[^=]+)*))?$");
 
@@ -29,6 +29,10 @@ public class HTTPRequest {
     public String getQuery(String key) {
         if(queries == null) return null;
         return queries.get(key);
+    }
+
+    public String getHeader(String field) {
+        return headers.get(field);
     }
 
     boolean parse(InputStream inputStream) {

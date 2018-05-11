@@ -29,7 +29,11 @@ class Scanner {
 
     boolean scan() {
 
-        // TODO: maybe first index everything, and look for metadata later? so that we can update the user on the progress?
+        /* TODO: maybe first index everything, and look for metadata later? so that we can update the user on the progress?
+         * 1. Indexing
+         * 2. Retreiving metadata
+         * 3. Create smaller versions / thumbnails
+         */
 
         // Make sure the current root directory is a directory
         File directory = new File(controller.getData().getRootDirectory());
@@ -46,6 +50,8 @@ class Scanner {
     }
 
     private boolean scanDirectory(File directory) {
+        if(directory.getName().equals("_data_")) return true; // TODO
+
         // Determine directory path
         String directoryPath = directory.getAbsolutePath();
         String rootDirectory = controller.getData().getRootDirectory();
@@ -105,6 +111,10 @@ class Scanner {
         picture.filename = file.getName();
         album.pictures.add(picture);
         controller.getData().getPictures().add(picture);
+
+        // Create smaller version of the picture
+        PictureResizer resizer = new PictureResizer();
+        resizer.resize(file.getAbsolutePath(), controller.getData().getRootDirectory() + "/_data_/thumb/" + picture.id + ".jpg");
 
         try {
             // Look for people in metadata

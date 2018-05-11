@@ -1,3 +1,4 @@
+// var apiUrl = 'https://www.robertvankammen.nl:9090';
 var apiUrl = 'http://localhost:4321';
 
 function apiRequest(endpoint, callback) {
@@ -13,7 +14,7 @@ function apiRequest(endpoint, callback) {
   console.log('[API request] ' + apiUrl + endpoint);
 }
 
-function apiRequestImage(endpoint, callback) {
+function apiRequestPicture(endpoint, callback) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function() {
     var reader = new FileReader();
@@ -36,18 +37,21 @@ function apiHealth(callback) {
   apiRequest('/health', callback);
 }
 
-function apiPersons(callback) {
-  apiRequest('/persons', callback);
+function apiPeople(callback) {
+  apiRequest('/people', callback);
 }
 
-function apiPersonsPhotosAmount(ids, start, amount, callback) {
-  apiRequest('/persons/pictures?personsId=' + ids + '&start=' + start + '&amount=' + amount, callback);
+function apiSearch(filters, start, amount, callback) {
+  var filterTerms = '';
+  for(var x in filters)
+    filterTerms += '&' + x + '=' + filters[x].join(';');
+  apiRequest('/search?start=' + start + '&amount=' + amount + filterTerms, callback);
 }
 
-function apiPhoto(id, size, callback) {
-  apiRequestImage('/picture/' + id + '?size=' + size, callback);
+function apiPicture(id, size, callback) {
+  apiRequestPicture('/pictures/' + id + '?size=' + size, callback);
 }
 
-function apiPersonPicture(id, callback) {
-  apiRequestImage('/persons/' + id + '/profilepicture', callback);
+function apiProfilePicture(id, callback) {
+  apiRequestPicture('/people/' + id + '/profilepicture', callback);
 }

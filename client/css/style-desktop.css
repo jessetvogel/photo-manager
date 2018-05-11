@@ -35,7 +35,7 @@
   height: 192px;
 }
 
-.person-picture {
+.person-profile-picture {
   width: 128px;
   height: 128px;
   border-radius: 64px;
@@ -45,17 +45,17 @@
   font-size: 48px;
 }
 
-.person-photos .photo {
+.person-pictures .picture {
   width: 256px;
   padding-bottom: 256px;
   margin: 6px;
 }
 
-.person-photos .photo:hover {
+.person-pictures .picture:hover {
   animation: scalein 0.2s forwards;
 }
 
-.overlay .photo-large {
+.overlay .picture-large {
   max-width: 80%;
   max-height: 80%;
 }
