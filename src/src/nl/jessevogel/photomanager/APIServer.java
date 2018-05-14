@@ -93,7 +93,13 @@ public class APIServer extends HTTPServer {
         Picture picture = controller.getData().getPictureById(id);
         if (picture == null) return errorNotFound(request, response); // TODO ?
         Album album = controller.getData().getAlbumById(picture.albumId);
-        String path = controller.getData().getRootDirectory() + album.path + "/" + picture.filename;
+        String path;
+
+        String size = request.getQuery("size");
+        if(size != null && size.equals("small"))
+            path = controller.getData().getRootDirectory() + "/_data_/thumb/" + picture.id + ".jpg";
+        else
+            path = controller.getData().getRootDirectory() + album.path + "/" + picture.filename;
 
         response.setStatusLine("HTTP/1.1 200 OK");
         response.setHeader("Content-Type", "image/jpeg");

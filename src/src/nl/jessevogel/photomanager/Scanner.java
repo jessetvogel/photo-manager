@@ -37,7 +37,7 @@ class Scanner {
 
         // Make sure the current root directory is a directory
         File directory = new File(controller.getData().getRootDirectory());
-        if(!directory.exists() || !directory.isDirectory()) return false;
+        if (!directory.exists() || !directory.isDirectory()) return false;
 
         // Clear current data
         Data data = controller.getData();
@@ -46,37 +46,47 @@ class Scanner {
         data.getPictures().clear();
 
         // Scan the root directory
-        return scanDirectory(directory);
+        Log.print("Indexing pictures in " + directory.getAbsolutePath() + "...");
+        boolean success = indexDirectory(directory);
+
+        Log.print("Retreiving metadata...");
+        for(Picture picture : controller.getData().getPictures())
+            success = success & getMetaData(picture);
+
+        Log.print("Creating thumbnails...");
+        for(Picture picture : controller.getData().getPictures())
+            success = success & resizePicture(picture);
+
+        return success;
     }
 
-    private boolean scanDirectory(File directory) {
-        if(directory.getName().equals("_data_")) return true; // TODO
+    private boolean indexDirectory(File directory) {
+        if (directory.getName().equals("_data_")) return true; // TODO
 
         // Determine directory path
         String directoryPath = directory.getAbsolutePath();
         String rootDirectory = controller.getData().getRootDirectory();
-        if(directoryPath.startsWith(rootDirectory)) directoryPath = directoryPath.substring(rootDirectory.length());
+        if (directoryPath.startsWith(rootDirectory)) directoryPath = directoryPath.substring(rootDirectory.length());
 
         // Go through all files in this directory
         File[] files = directory.listFiles();
-        if(files == null) return false;
+        if (files == null) return false;
         Album album = null;
-        for(File file : files) {
-            if(file.isDirectory()) {
+        for (File file : files) {
+            if (file.isDirectory()) {
                 // Scan every subdirectory
-                if(!scanDirectory(file)) {
+                if (!indexDirectory(file)) {
                     Log.error("Failed to scan directory " + file.getAbsolutePath());
                     return false;
                 }
-            }
-            else {
+            } else {
                 // Only process files that should be processed
-                if(!shouldProcessFile(file)) continue;
+                if (!shouldProcessFile(file)) continue;
 
                 // If this directory does not have an associated album, create one
-                if(album == null) {
+                if (album == null) {
                     album = controller.getData().getAlbumByPath(directoryPath);
-                    if(album == null) {
+                    if (album == null) {
                         album = new Album();
                         album.id = controller.getData().getAlbums().size();  // TODO
                         album.title = file.getParentFile().getName();
@@ -85,11 +95,13 @@ class Scanner {
                     }
                 }
 
-                // Process the file
-                if(!processFile(album, file)) {
-                    Log.error("Failed to process file " + file.getAbsolutePath());
-                    return false;
-                }
+                // Create a new picture object
+                Picture picture = new Picture();
+                picture.id = controller.getData().getPictures().size(); // TODO
+                picture.albumId = album.id;
+                picture.filename = file.getName();
+                album.pictures.add(picture);
+                controller.getData().getPictures().add(picture);
             }
         }
 
@@ -103,30 +115,25 @@ class Scanner {
         return i >= 0 && allowedExtensions.contains(fileName.substring(i + 1));
     }
 
-    private boolean processFile(Album album, File file) {
-        // Create a new picture object
-        Picture picture = new Picture();
-        picture.id = controller.getData().getPictures().size(); // TODO
-        picture.albumId = album.id;
-        picture.filename = file.getName();
-        album.pictures.add(picture);
-        controller.getData().getPictures().add(picture);
-
-        // Create smaller version of the picture
-        PictureResizer resizer = new PictureResizer();
-        resizer.resize(file.getAbsolutePath(), controller.getData().getRootDirectory() + "/_data_/thumb/" + picture.id + ".jpg");
+    private boolean getMetaData(Picture picture) {
+        // Construct file from picture
+        File file = new File(controller.getData().getRootDirectory() + controller.getData().getAlbumById(picture.albumId).path + "/" + picture.filename);
+        if (!file.exists()) {
+            Log.error("For some reason " + file.getAbsolutePath() + " doesn't exist?");
+            return false;
+        }
 
         try {
             // Look for people in metadata
             Metadata metadata = ImageMetadataReader.readMetadata(file);
             for (XmpDirectory xmpDirectory : metadata.getDirectoriesOfType(XmpDirectory.class)) {
-                for(Map.Entry<String, String> entry : xmpDirectory.getXmpProperties().entrySet()) {
-                    if(!entry.getKey().endsWith("mwg-rs:Name")) continue;
+                for (Map.Entry<String, String> entry : xmpDirectory.getXmpProperties().entrySet()) {
+                    if (!entry.getKey().endsWith("mwg-rs:Name")) continue;
 
                     // Find corresponding person (create one if does not exist)
                     String name = entry.getValue();
                     Person person = controller.getData().getPersonByName(name);
-                    if(person == null) {
+                    if (person == null) {
                         person = new Person();
                         person.id = controller.getData().getPeople().size();
                         person.name = name;
@@ -139,6 +146,20 @@ class Scanner {
             e.printStackTrace();
         }
 
+        return true;
+    }
+
+    private boolean resizePicture(Picture picture) {
+        // Construct file from picture
+        File file = new File(controller.getData().getRootDirectory() + controller.getData().getAlbumById(picture.albumId).path + "/" + picture.filename);
+        if (!file.exists()) {
+            Log.error("For some reason " + file.getAbsolutePath() + " doesn't exist?");
+            return false;
+        }
+
+        // Create smaller version of the picture
+        PictureResizer resizer = new PictureResizer();
+        resizer.resize(file.getAbsolutePath(), controller.getData().getRootDirectory() + "/_data_/thumb/" + picture.id + ".jpg");
         return true;
     }
 

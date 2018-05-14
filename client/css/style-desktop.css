@@ -24,34 +24,34 @@
   height: 96px;
 }
 
-.people-tiles .tile:hover {
+.people-tiles .tile:hover, .albums-tiles .tile:hover {
   animation: scalein 0.2s forwards;
 }
 
-.person-header {
+.person-header, .album-header {
   margin-left: auto;
   margin-right: auto;
   max-width: 720px;
   height: 192px;
 }
 
-.person-profile-picture {
+.person-profile-picture, .album-cover-picture {
   width: 128px;
   height: 128px;
   border-radius: 64px;
 }
 
-.person-name {
+.person-name, .album-title {
   font-size: 48px;
 }
 
-.person-pictures .picture {
+.person-pictures .picture, .album-pictures .picture {
   width: 256px;
   padding-bottom: 256px;
   margin: 6px;
 }
 
-.person-pictures .picture:hover {
+.person-pictures .picture:hover, .album-pictures .picture:hover {
   animation: scalein 0.2s forwards;
 }
 

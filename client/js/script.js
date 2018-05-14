@@ -5,6 +5,7 @@ $(document).ready(function () {
 
   // Click events sidebar buttons
   $('#button-people').click(loadPeople);
+  $('#button-albums').click(loadAlbums);
 });
 
 function checkHealthStatus() {
@@ -51,9 +52,9 @@ function loadPeople() {
 
     // Create tiles
     for(var i = 0;i < data.length; ++i) {
-      // Set some peopleData
-      setPeopleData(data[i].id, 'name', data[i].name);
-      if(data[i].profilePictureUrn == null) setPeopleData(data[i].id, 'profile-picture', false);
+      // Set some people data
+      setData('person' + data[i].id, 'name', data[i].name);
+      if(data[i].profilePictureUrn == null) setData('person' + data[i].id, 'profilePicture', false);
 
       // Set tile content
       var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(data[i].name));
@@ -79,17 +80,74 @@ function loadPeople() {
   });
 }
 
+function loadAlbums() {
+  // Construct content
+  var content = $('<div>').addClass('content-albums');
+  var albumsSearch = $('<div>').addClass('albums-search');
+  var albumsTiles = $('<div>').addClass('albums-tiles').append($('<div>').addClass('loading'));
+
+  // Search bar
+  albumsSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by title').keyup(function () {
+    var searchTerm = $(this).val().toLowerCase();
+    $('.albums-tiles .tile').each(function () {
+      if(searchMatch($(this).find('.title').text(), searchTerm))
+        $(this).show();
+      else
+        $(this).hide();
+    });
+  }));
+
+  // Set content
+  content.append(albumsSearch);
+  content.append(albumsTiles);
+  $('#content').html(content);
+
+  // Get list of albums
+  apiAlbums(function (data) {
+    // Clear peopleTiles
+    albumsTiles.html('').hide();
+
+    // Create tiles
+    for(var i = 0;i < data.length; ++i) {
+      // Set some album data
+      setData('album' + data[i].id, 'title', data[i].title);
+      if(data[i].coverPicture == null) setData('album' + data[i].id, 'coverPicture', false);
+
+      // Set tile content
+      var tile = $('<div>').addClass('tile').append($('<span>').addClass('title').text(data[i].title));
+      (function (tile) {
+        loadCoverPicture(data[i].id, function (data) {
+          tile.css({ backgroundImage: 'url(' + data + ')' });
+        });
+      })(tile);
+
+      // Click event
+      (function (id) {
+        tile.click(function () {
+          loadAlbum(id);
+        });
+      })(data[i].id);
+
+      // Add to tiles
+      albumsTiles.append(tile);
+    }
+
+    // Fade in
+    albumsTiles.css({ animation: 'fadein 0.5s' }).show();
+  });
+}
+
 function loadPerson(id) {
   // Construct content
   var content = $('<div>').addClass('content-person');
   var personHeader = $('<div>').addClass('person-header');
   var personPictures = $('<div>').addClass('person-pictures');
-  var personPicturesEnd = $('<div>').addClass('person-pictures-end');
+  var personPicturesEnd = $('<div>').addClass('feed-pictures-end');
 
   // Person header
   var personProfilePicture = $('<div>').addClass('person-profile-picture');
   personHeader.append(personProfilePicture);
-  personHeader.append($('<div>').addClass('person-name').text(getPeopleData(id, 'name')));
+  personHeader.append($('<div>').addClass('person-name').text(getData('person' + id, 'name')));
   loadProfilePicture(id, function (data) {
     personProfilePicture.css({ backgroundImage: 'url(' + data + ')'});
   });
@@ -100,7 +158,7 @@ function loadPerson(id) {
       clearInterval(t);
       return;
     }
-    if(!loadingBatch && checkPersonShouldLoadNewBatch()) {
+    if(!loadingBatch && checkShouldLoadNewBatch()) {
       loadPersonPicturesBatch(id, PICTURES_PER_BATCH);
     }
   }, 100);
@@ -111,16 +169,47 @@ function loadPerson(id) {
   content.append(personPicturesEnd);
   $('#content').html(content);
 
-  reachedEndOfPersonFeed = false;
+  reachedEndOfFeed = false;
   loadPersonPicturesBatch(id, PICTURES_PER_BATCH);
+}
+
+function loadAlbum(id) {
+  // Construct content
+  var content = $('<div>').addClass('content-album');
+  var albumHeader = $('<div>').addClass('album-header');
+  var albumPictures = $('<div>').addClass('album-pictures');
+  var albumPicturesEnd = $('<div>').addClass('feed-pictures-end');
+
+  // Album header
+  albumHeader.append($('<div>').addClass('album-title').text(getData('album' + id, 'title')));
+
+  // Set interval to check if should load new batch TODO: is there a better way?
+  var t = setInterval(function () {
+    if($('.content-album').length == 0) {
+      clearInterval(t);
+      return;
+    }
+    if(!loadingBatch && checkShouldLoadNewBatch()) {
+      loadAlbumPicturesBatch(id, PICTURES_PER_BATCH);
+    }
+  }, 100);
+
+  // Set content
+  content.append(albumHeader);
+  content.append(albumPictures);
+  content.append(albumPicturesEnd);
+  $('#content').html(content);
+
+  reachedEndFeed = false;
+  loadAlbumPicturesBatch(id, PICTURES_PER_BATCH);
 }
 
 var PICTURES_PER_BATCH = 12;
 var loadingBatch = false;
-var reachedEndOfPersonFeed = false;
+var reachedEndFeed = false;
 
-function checkPersonShouldLoadNewBatch() {
-  return (!reachedEndOfPersonFeed && $('.person-pictures-end').offset().top < $('body').height());
+function checkShouldLoadNewBatch() {
+  return (!reachedEndFeed && $('.feed-pictures-end').offset().top < $('body').height());
 }
 
 function loadPersonPicturesBatch(id, amount) {
@@ -128,15 +217,15 @@ function loadPersonPicturesBatch(id, amount) {
   loadingBatch = true;
 
   // Add loading icon
-  $('.person-pictures-end').append($('<div>').addClass('loading'));
+  $('.feed-pictures-end').append($('<div>').addClass('loading'));
 
   // Load pictures
   var start = $('.person-pictures .picture').length;
   apiSearch({ people: [ id ] }, start, amount, function (data) {
     // Check if any pictures were returned
     if(data.pictures.length == 0) {
-      reachedEndOfPersonFeed = true;
-      $('.person-pictures-end').html($('<span>').addClass('text-end-of-feed').text('~'));
+      reachedEndOfFeed = true;
+      $('.feed-pictures-end').html($('<span>').addClass('text-end-of-feed').text('~'));
       return;
     }
 
@@ -147,7 +236,7 @@ function loadPersonPicturesBatch(id, amount) {
 
       // Click event
       (function (picture) {
-        apiPicture(data.pictures[i].id, 'midi', function (data) {
+        apiPicture(data.pictures[i].id, 'small', function (data) {
           picture.css({ backgroundImage: 'url(' + data + ')'});
           picture.click(function () {
             overlay($('<img>').addClass('picture-large').prop('src', data));
@@ -160,11 +249,61 @@ function loadPersonPicturesBatch(id, amount) {
     }
 
     // Remove loading icon
-    $('.person-pictures-end').html('');
+    $('.feed-pictures-end').html('');
 
     // Check if a new batch should be loaded
-    if(checkPersonShouldLoadNewBatch()) {
+    if(checkShouldLoadNewBatch()) {
       loadPersonPicturesBatch(id, PICTURES_PER_BATCH);
+    }
+    else {
+      // Indicate no batch is being loaded anymore
+      loadingBatch = false;
+    }
+  });
+}
+
+function loadAlbumPicturesBatch(id, amount) {
+  // Indicate a batch is being loaded
+  loadingBatch = true;
+
+  // Add loading icon
+  $('.feed-pictures-end').append($('<div>').addClass('loading'));
+
+  // Load pictures
+  var start = $('.album-pictures .picture').length;
+  apiSearch({ albums: [ id ] }, start, amount, function (data) {
+    // Check if any pictures were returned
+    if(data.pictures.length == 0) {
+      reachedEndOfFeed = true;
+      $('.feed-pictures-end').html($('<span>').addClass('text-end-of-feed').text('~'));
+      return;
+    }
+
+    // Create pictures
+    for(var i = 0;i < data.pictures.length; ++i) {
+      // Set picture content
+      var picture = $('<div>').addClass('picture');
+
+      // Click event
+      (function (picture) {
+        apiPicture(data.pictures[i].id, 'small', function (data) {
+          picture.css({ backgroundImage: 'url(' + data + ')'});
+          picture.click(function () {
+            overlay($('<img>').addClass('picture-large').prop('src', data));
+          });
+        });
+      })(picture);
+
+      // Add to pictures
+      $('.album-pictures').append(picture);
+    }
+
+    // Remove loading icon
+    $('.feed-pictures-end').html('');
+
+    // Check if a new batch should be loaded
+    if(checkShouldLoadNewBatch()) {
+      loadAlbumPicturesBatch(id, PICTURES_PER_BATCH);
     }
     else {
       // Indicate no batch is being loaded anymore
@@ -181,21 +320,21 @@ function overlay(content) {
   $('body').append(overlay);
 }
 
-function getPeopleData(id, key) {
-  if(peopleData[id] == undefined) peopleData[id] = {};
-  if(peopleData[id][key] == undefined) return null;
-  return peopleData[id][key];
+var data = {};
+
+function getData(id, key) {
+  if(data[id] == undefined) data[id] = {};
+  if(data[id][key] == undefined) return null;
+  return data[id][key];
 }
 
-var peopleData = {};
-
-function setPeopleData(id, key, value) {
-  if(peopleData[id] == undefined) peopleData[id] = {};
-  peopleData[id][key] = value;
+function setData(id, key, value) {
+  if(data[id] == undefined) data[id] = {};
+  data[id][key] = value;
 }
 
 function loadProfilePicture(id, callback) {
-  var profilePictureData = getPeopleData(id, 'profile-picture');
+  var profilePictureData = getData('person' + id, 'profilePicture');
 
   // In case this person has no picture
   if(profilePictureData == false) {
@@ -213,11 +352,25 @@ function loadProfilePicture(id, callback) {
   else {
     (function (id, callback) {
       apiProfilePicture(id, function (data) {
-        setPeopleData(id, 'profile-picture', data);
+        setData('person' + id, 'profilePicture', data);
         callback(data);
       });
     })(id, callback);
   }
+}
+
+function loadCoverPicture(id, callback) {
+  var coverPictureData = getData('album' + id, 'coverPicture');
+
+  // In case the picture is already loaded
+  if(coverPictureData != null && coverPictureData != false) {
+    callback(coverPictureData);
+    return;
+  }
+
+  // Otherwise, load the picture
+  // TODO!
+  callback('/img/cover-picture-default.png');
 }
 
 function searchMatch(string, searchTerm) {

@@ -41,6 +41,10 @@ function apiPeople(callback) {
   apiRequest('/people', callback);
 }
 
+function apiAlbums(callback) {
+  apiRequest('/albums', callback);
+}
+
 function apiSearch(filters, start, amount, callback) {
   var filterTerms = '';
   for(var x in filters)

@@ -86,7 +86,7 @@ body {
   color: rgb(186, 40, 40);
 }
 
-.content-people {
+.content-people, .content-albums {
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 64px;
@@ -94,18 +94,18 @@ body {
   animation: fadein 0.2s forwards;
 }
 
-.content-person {
+.content-person, .content-album {
   height: 100%;
 }
 
-.person-header {
+.person-header, .album-header {
   display: flex;
   justify-content: center;
   align-items: center;;
   height: 128px;
 }
 
-.person-profile-picture {
+.person-profile-picture, .album-cover-picture {
   width: 96px;
   height: 96px;
   border-radius: 64px;
@@ -113,14 +113,14 @@ body {
   background-position: center;
 }
 
-.person-name {
+.person-name, .album-title {
   font-size: 32px;
   position: relative;
   top: 4px;
   margin-left: 16px;
 }
 
-.person-pictures {
+.person-pictures, .album-pictures {
   max-width: 804px;
   margin-left: auto;
   margin-right: auto;
@@ -129,7 +129,7 @@ body {
   justify-content: center;
 }
 
-.person-pictures .picture {
+.person-pictures .picture, .album-pictures .picture {
   width: 49%;
   padding-bottom: 49%;
   margin: 0.25%;
@@ -141,7 +141,7 @@ body {
   animation: scaleout 0.2s;
 }
 
-.person-pictures-end {
+.feed-pictures-end {
   max-width: 720px;
   height: 64px;
   margin-left: auto;
@@ -150,13 +150,13 @@ body {
   justify-content: center;
 }
 
-.people-search {
+.people-search, .albums-search {
   text-align: center;
   height: 128px;
   line-height: 128px;
 }
 
-.people-search span {
+.people-search span, .albums-search span {
   font-size: 32px;
   position: relative;
   top: 12px;
@@ -164,7 +164,7 @@ body {
   opacity: 0.25;
 }
 
-.people-tiles {
+.people-tiles, .albums-tiles {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
@@ -184,13 +184,27 @@ body {
   animation: scaleout 0.2s;
 }
 
-.people-tiles .tile .name {
+.albums-tiles .tile {
+  width: 128px;
+  height: 128px;
+  border-radius: 0px;
+  background-image: url('../img/cover-picture-default.png');
+  background-size: cover;
+  background-position: center;
+  margin: 16px;
+  margin-bottom: 48px;
+  text-align: center;
+  cursor: pointer;
+  animation: scaleout 0.2s;
+}
+
+.people-tiles .tile .name, .albums-tiles .tile .title {
   font-size: 14px;
   position: relative;
   top: 140px;
 }
 
-.people-search input {
+.people-search input, .albums-search input {
   border: 0;
   outline: none;
   line-height: 24px;
