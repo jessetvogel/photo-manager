@@ -6,11 +6,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-class PictureResizer {
+class Thumbnailator {
 
     private static final int MAX_SIZE_SMALL = 720;
 
-    boolean resize(String sourcePath, String destinationPath) {
+    boolean resizeSmall(String sourcePath, String destinationPath) {
+        return resize(sourcePath, destinationPath, MAX_SIZE_SMALL);
+    }
+
+    private boolean resize(String sourcePath, String destinationPath, int size) {
         try {
             BufferedImage originalImage = ImageIO.read(new File(sourcePath));
             int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
@@ -19,15 +23,15 @@ class PictureResizer {
             int height = originalImage.getHeight();
 
             if(width > height) {
-                if(width > MAX_SIZE_SMALL) {
-                    height = height * MAX_SIZE_SMALL / width;
-                    width = MAX_SIZE_SMALL;
+                if(width > size) {
+                    height = height * size / width;
+                    width = size;
                 }
             }
             else {
-                if(height > MAX_SIZE_SMALL) {
-                    width = width * MAX_SIZE_SMALL / height;
-                    height = MAX_SIZE_SMALL;
+                if(height > size) {
+                    width = width * size / height;
+                    height = size;
                 }
             }
 

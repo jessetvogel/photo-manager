@@ -22,7 +22,7 @@ public class Log {
         System.out.println("[WARNING] " + message);
     }
 
-    public static void updatePercentage(int percentage) {
+    static void updatePercentage(int percentage) {
         System.out.print("\b\b\b\b");
         if(percentage < 10) System.out.print(" ");
         if(percentage < 100) System.out.print(" ");

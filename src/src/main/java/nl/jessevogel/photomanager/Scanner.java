@@ -191,8 +191,8 @@ class Scanner {
         }
 
         // Create smaller version of the picture
-        PictureResizer pictureResizer = new PictureResizer();
-        return pictureResizer.resize(file.getAbsolutePath(), controller.getData().getThumbPath(picture));
+        Thumbnailator pictureResizer = new Thumbnailator();
+        return pictureResizer.resizeSmall(file.getAbsolutePath(), controller.getData().getThumbPath(picture));
     }
 
 }

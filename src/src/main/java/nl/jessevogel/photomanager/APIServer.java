@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class APIServer extends HTTPServer {
+class APIServer extends HTTPServer {
 
     private Controller controller;
 
