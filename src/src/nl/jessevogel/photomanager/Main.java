@@ -7,7 +7,8 @@ public class Main {
         Controller controller = new Controller();
 
         // Load data
-        controller.getData().loadData();
+        if(!controller.getData().loadData())
+            Log.error("Failed to load data!");
 
         // Start API server
         controller.getAPIServer().start();

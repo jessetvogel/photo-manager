@@ -27,8 +27,16 @@ public class HTTPRequest {
     }
 
     public String getQuery(String key) {
-        if(queries == null) return null;
+        if (queries == null) return null;
         return queries.get(key);
+    }
+
+    public int getQueryInteger(String key, int intDefault) {
+        try {
+            return Integer.parseInt(getQuery(key));
+        } catch (NumberFormatException e) {
+            return intDefault;
+        }
     }
 
     public String getHeader(String field) {
@@ -40,6 +48,7 @@ public class HTTPRequest {
             // Parse request line
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String requestLine = br.readLine();
+            if(requestLine == null) return false;
             Matcher m = patternRequestLine.matcher(requestLine);
             if (!m.find()) return false;
             method = m.group(1);

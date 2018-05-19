@@ -7,8 +7,7 @@ import nl.jessevogel.photomanager.httpserver.HTTPRequest;
 import nl.jessevogel.photomanager.httpserver.HTTPResponse;
 import nl.jessevogel.photomanager.httpserver.HTTPServer;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,25 +25,37 @@ public class APIServer extends HTTPServer {
     public boolean respond(HTTPRequest request, HTTPResponse response) {
         // CORS
         String origin = request.getHeader("Origin");
-        if(origin != null) {
+        if (origin != null) {
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Credentials", "true");
             response.setHeader("Access-Control-Allow-Methods", "POST, GET");
             response.setHeader("Access-Control-Allow-Headers", "*");
         }
 
+        // Depending on URI, respond accordingly
         String URIPath = request.getURIPath();
+        if (URIPath.equals("/")) return home(request, response);
         if (URIPath.equals("/health")) return health(request, response);
         if (URIPath.equals("/people")) return people(request, response);
         if (URIPath.equals("/albums")) return albums(request, response);
-        if (URIPath.matches("^\\/pictures\\/(\\d+)$")) return picture(request, response);
+        if (URIPath.matches("^\\/pictures\\/\\d+$")) return picture(request, response);
+        if (URIPath.matches("^\\/people\\/\\d+\\/profilepicture$")) return profilePicture(request, response);
+        if (URIPath.matches("^\\/albums\\/\\d+\\/cover")) return cover(request, response);
+        if (URIPath.equals("/people")) return people(request, response);
         if (URIPath.equals("/search")) return search(request, response);
 
         // If not found, return 404 Not Found
         return errorNotFound(request, response);
     }
 
-    // API endpoints
+    // API endpoints methods
+
+    private boolean home(HTTPRequest request, HTTPResponse response) {
+        response.setStatusLine("HTTP/1.1 200 OK");
+        response.setHeader("Content-Type", "text/plain");
+        response.addMessage("Hello there!");
+        return true;
+    }
 
     private boolean health(HTTPRequest request, HTTPResponse response) {
         response.setStatusLine("HTTP/1.1 200 OK");
@@ -61,11 +72,11 @@ public class APIServer extends HTTPServer {
         for (Person person : controller.getData().getPeople()) {
             if (!first) response.addMessage(",");
             first = false;
-            response.addMessage("{");
-            response.addMessage("\"id\":" + person.id + ",");
-            response.addMessage("\"name\":\"" + person.name + "\",");
-            response.addMessage("\"profilePictureUrn\":null");
-            response.addMessage("}");
+            response.addMessage("{"
+                    + "\"id\":" + person.id + ","
+                    + "\"name\":\"" + person.name + "\","
+                    + "\"profilePicture\":" + (new File(controller.getData().getProfilePicturePath(person))).exists()
+                    + "}");
         }
         response.addMessage("]");
         return true;
@@ -79,41 +90,28 @@ public class APIServer extends HTTPServer {
         for (Album album : controller.getData().getAlbums()) {
             if (!first) response.addMessage(",");
             first = false;
-            response.addMessage("{");
-            response.addMessage("\"id\":" + album.id + ",");
-            response.addMessage("\"title\":\"" + album.title + "\"");
-            response.addMessage("}");
+            response.addMessage("{"
+                    + "\"id\":" + album.id + ","
+                    + "\"title\":\"" + album.title + "\""
+                    + "}");
         }
         response.addMessage("]");
         return true;
     }
 
     private boolean picture(HTTPRequest request, HTTPResponse response) {
-        Integer id = Integer.parseInt(request.getURIPath().substring(request.getURIPath().lastIndexOf('/') + 1)); // TODO: cleaner?
-        Picture picture = controller.getData().getPictureById(id);
-        if (picture == null) return errorNotFound(request, response); // TODO ?
-        Album album = controller.getData().getAlbumById(picture.albumId);
+        Integer pictureId = Integer.parseInt(request.getURIPath().substring(request.getURIPath().lastIndexOf('/') + 1)); // TODO: cleaner?
+        Picture picture = controller.getData().getPictureById(pictureId);
+        if (picture == null) return errorNotFound(request, response);
+
         String path;
-
         String size = request.getQuery("size");
-        if(size != null && size.equals("small"))
-            path = controller.getData().getRootDirectory() + "/_data_/thumb/" + picture.id + ".jpg";
+        if (size != null && size.equals("small"))
+            path = controller.getData().getThumbPath(picture);
         else
-            path = controller.getData().getRootDirectory() + album.path + "/" + picture.filename;
+            path = controller.getData().getPicturePath(picture);
 
-        response.setStatusLine("HTTP/1.1 200 OK");
-        response.setHeader("Content-Type", "image/jpeg");
-        try {
-            FileInputStream inputStream = new FileInputStream(path);
-            byte[] buffer = new byte[1024];
-            int n;
-            while ((n = inputStream.read(buffer)) != -1)
-                response.addMessage(buffer, 0, n);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return true;
+        return sendFile(request, response, path);
     }
 
     private boolean search(HTTPRequest request, HTTPResponse response) {
@@ -159,19 +157,12 @@ public class APIServer extends HTTPServer {
 
         // Construct array list
         ArrayList<Picture> arrayPictures = new ArrayList<>();
-        arrayPictures.addAll(pictures);
+        if (pictures != null) arrayPictures.addAll(pictures);
         int size = arrayPictures.size();
 
         // Determine start and amount
-        int start = 0, amount = 10;
-        try {
-            start = Integer.parseInt(request.getQuery("start"));
-        } catch (NumberFormatException e) {
-        }
-        try {
-            amount = Integer.parseInt(request.getQuery("amount"));
-        } catch (NumberFormatException e) {
-        }
+        int start = request.getQueryInteger("start", 0);
+        int amount = request.getQueryInteger("amount", 10);
 
         // Send response
         response.setStatusLine("HTTP/1.1 200 OK");
@@ -186,12 +177,32 @@ public class APIServer extends HTTPServer {
             if (first) first = false;
             else response.addMessage(",");
             Picture picture = arrayPictures.get(i);
-            response.addMessage("{\"id\":" + picture.id + "}");
+            response.addMessage("{"
+                    + "\"id\":" + picture.id
+                    + "}");
         }
 
         response.addMessage("]");
         response.addMessage("}");
         return true;
+    }
+
+    private boolean profilePicture(HTTPRequest request, HTTPResponse response) {
+        String URIPath = request.getURIPath();
+        int personId = Integer.parseInt(URIPath.substring(8, URIPath.lastIndexOf('/')));
+        Person person = controller.getData().getPersonById(personId);
+        if (person == null) return errorNotFound(request, response);
+
+        return sendFile(request, response, controller.getData().getProfilePicturePath(person));
+    }
+
+    private boolean cover(HTTPRequest request, HTTPResponse response) {
+        String URIPath = request.getURIPath();
+        int albumId = Integer.parseInt(URIPath.substring(8, URIPath.lastIndexOf('/')));
+        Album album = controller.getData().getAlbumById(albumId);
+        if (album == null) return errorNotFound(request, response);
+
+        return sendFile(request, response, controller.getData().getThumbPath(album.pictures.iterator().next()));
     }
 
 }

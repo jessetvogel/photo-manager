@@ -19,6 +19,10 @@ class Scanner {
 
     private ArrayList<String> allowedExtensions;
 
+    private int currentPictureId;
+    private int currentAlbumId;
+    private int currentPersonId;
+
     Scanner(Controller controller) {
         this.controller = controller;
         allowedExtensions = new ArrayList<>();
@@ -29,11 +33,16 @@ class Scanner {
 
     boolean scan() {
 
-        /* TODO: maybe first index everything, and look for metadata later? so that we can update the user on the progress?
-         * 1. Indexing
-         * 2. Retreiving metadata
-         * 3. Create smaller versions / thumbnails
+        /*
+         * Step 1. Index all pictures
+         * Step 2. Retreiving metadata
+         * Step 3. Create smaller versions / thumbnails
          */
+
+        // Reset counters
+        currentPictureId = 0;
+        currentAlbumId = 0;
+        currentPersonId = 0;
 
         // Make sure the current root directory is a directory
         File directory = new File(controller.getData().getRootDirectory());
@@ -46,27 +55,51 @@ class Scanner {
         data.getPictures().clear();
 
         // Scan the root directory
-        Log.print("Indexing pictures in " + directory.getAbsolutePath() + "...");
+        Log.println("Indexing pictures in " + directory.getAbsolutePath() + " ...");
         boolean success = indexDirectory(directory);
+        if(!success) {
+            Log.println("Something went wrong while indexing pictures.");
+            return false;
+        }
 
-        Log.print("Retreiving metadata...");
-        for(Picture picture : controller.getData().getPictures())
+        ArrayList<Picture> pictures = controller.getData().getPictures();
+        int N = pictures.size();
+        Log.println("Found " + N + " pictures!");
+
+        Log.print("Retrieving metadata...   0%");
+        int index = 0;
+        for (Picture picture : pictures) {
             success = success & getMetaData(picture);
+            index++;
+            if (index * 100 / N > (index - 1) * 100 / N) Log.updatePercentage(index * 100 / N);
+        }
+        Log.println("");
 
-        Log.print("Creating thumbnails...");
-        for(Picture picture : controller.getData().getPictures())
+        Log.print("Creating thumbnails...   0%");
+        index = 0;
+        (new File(controller.getData().getThumbsFolder())).mkdir();
+        for (Picture picture : pictures) {
             success = success & resizePicture(picture);
+            index++;
+            if (index * 100 / N > (index - 1) * 100 / N) Log.updatePercentage(index * 100 / N);
+        }
+        Log.println("");
+
+        Log.println("Scanning complete!");
 
         return success;
     }
 
     private boolean indexDirectory(File directory) {
-        if (directory.getName().equals("_data_")) return true; // TODO
+        // Don't scan the data folder or hidden folders
+        if (directory.getAbsolutePath().equals(controller.getData().getDataFolder())) return true;
+        if (directory.getName().startsWith(".")) return true;
 
         // Determine directory path
         String directoryPath = directory.getAbsolutePath();
         String rootDirectory = controller.getData().getRootDirectory();
-        if (directoryPath.startsWith(rootDirectory)) directoryPath = directoryPath.substring(rootDirectory.length());
+        if (directoryPath.startsWith(rootDirectory) && directoryPath.length() > rootDirectory.length())
+            directoryPath = directoryPath.substring(rootDirectory.length() + 1);
 
         // Go through all files in this directory
         File[] files = directory.listFiles();
@@ -88,7 +121,7 @@ class Scanner {
                     album = controller.getData().getAlbumByPath(directoryPath);
                     if (album == null) {
                         album = new Album();
-                        album.id = controller.getData().getAlbums().size();  // TODO
+                        album.id = currentAlbumId ++;
                         album.title = file.getParentFile().getName();
                         album.path = directoryPath;
                         controller.getData().getAlbums().add(album);
@@ -97,7 +130,7 @@ class Scanner {
 
                 // Create a new picture object
                 Picture picture = new Picture();
-                picture.id = controller.getData().getPictures().size(); // TODO
+                picture.id = currentPictureId ++;
                 picture.albumId = album.id;
                 picture.filename = file.getName();
                 album.pictures.add(picture);
@@ -112,12 +145,12 @@ class Scanner {
         // Check the extension
         String fileName = file.getName();
         int i = fileName.lastIndexOf('.');
-        return i >= 0 && allowedExtensions.contains(fileName.substring(i + 1));
+        return i >= 0 && allowedExtensions.contains(fileName.substring(i + 1).toLowerCase());
     }
 
     private boolean getMetaData(Picture picture) {
         // Construct file from picture
-        File file = new File(controller.getData().getRootDirectory() + controller.getData().getAlbumById(picture.albumId).path + "/" + picture.filename);
+        File file = new File(controller.getData().getPicturePath(picture));
         if (!file.exists()) {
             Log.error("For some reason " + file.getAbsolutePath() + " doesn't exist?");
             return false;
@@ -135,7 +168,7 @@ class Scanner {
                     Person person = controller.getData().getPersonByName(name);
                     if (person == null) {
                         person = new Person();
-                        person.id = controller.getData().getPeople().size();
+                        person.id = currentPersonId ++;
                         person.name = name;
                         controller.getData().getPeople().add(person);
                     }
@@ -151,16 +184,15 @@ class Scanner {
 
     private boolean resizePicture(Picture picture) {
         // Construct file from picture
-        File file = new File(controller.getData().getRootDirectory() + controller.getData().getAlbumById(picture.albumId).path + "/" + picture.filename);
+        File file = new File(controller.getData().getPicturePath(picture));
         if (!file.exists()) {
             Log.error("For some reason " + file.getAbsolutePath() + " doesn't exist?");
             return false;
         }
 
         // Create smaller version of the picture
-        PictureResizer resizer = new PictureResizer();
-        resizer.resize(file.getAbsolutePath(), controller.getData().getRootDirectory() + "/_data_/thumb/" + picture.id + ".jpg");
-        return true;
+        PictureResizer pictureResizer = new PictureResizer();
+        return pictureResizer.resize(file.getAbsolutePath(), controller.getData().getThumbPath(picture));
     }
 
 }

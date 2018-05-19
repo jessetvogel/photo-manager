@@ -54,7 +54,7 @@ function loadPeople() {
     for(var i = 0;i < data.length; ++i) {
       // Set some people data
       setData('person' + data[i].id, 'name', data[i].name);
-      if(data[i].profilePictureUrn == null) setData('person' + data[i].id, 'profilePicture', false);
+      setData('person' + data[i].id, 'profilePicture', data[i].profilePicture);
 
       // Set tile content
       var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(data[i].name));
@@ -111,7 +111,7 @@ function loadAlbums() {
     for(var i = 0;i < data.length; ++i) {
       // Set some album data
       setData('album' + data[i].id, 'title', data[i].title);
-      if(data[i].coverPicture == null) setData('album' + data[i].id, 'coverPicture', false);
+      setData('album' + data[i].id, 'coverPicture', null);
 
       // Set tile content
       var tile = $('<div>').addClass('tile').append($('<span>').addClass('title').text(data[i].title));
@@ -343,7 +343,7 @@ function loadProfilePicture(id, callback) {
   }
 
   // In case the picture is already loaded
-  if(profilePictureData != null) {
+  if(profilePictureData != true) {
     callback(profilePictureData);
     return;
   }
@@ -363,14 +363,18 @@ function loadCoverPicture(id, callback) {
   var coverPictureData = getData('album' + id, 'coverPicture');
 
   // In case the picture is already loaded
-  if(coverPictureData != null && coverPictureData != false) {
+  if(coverPictureData != null) {
     callback(coverPictureData);
     return;
   }
 
   // Otherwise, load the picture
-  // TODO!
-  callback('/img/cover-picture-default.png');
+  (function (id, callback) {
+      apiCoverPicture(id, function (data) {
+        setData('album' + id, 'coverPicture', data);
+        callback(data);
+      });
+    })(id, callback);
 }
 
 function searchMatch(string, searchTerm) {

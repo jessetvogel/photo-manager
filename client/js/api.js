@@ -1,5 +1,5 @@
 // var apiUrl = 'https://www.robertvankammen.nl:9090';
-var apiUrl = 'http://localhost:4321';
+var apiUrl = 'http://192.168.2.82:4321';
 
 function apiRequest(endpoint, callback) {
   $.ajax({
@@ -58,4 +58,8 @@ function apiPicture(id, size, callback) {
 
 function apiProfilePicture(id, callback) {
   apiRequestPicture('/people/' + id + '/profilepicture', callback);
+}
+
+function apiCoverPicture(id, callback) {
+  apiRequestPicture('/albums/' + id + '/cover', callback);
 }

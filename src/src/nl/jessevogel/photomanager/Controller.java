@@ -9,9 +9,9 @@ class Controller {
     private APIServer apiServer;
 
     Controller() {
-        // Create subcontrollers
+        // Create sub-controllers
         commands = new Commands(this);
-        data = new Data(this);
+        data = new Data();
         apiServer = new APIServer(this, API_PORT);
     }
 

@@ -23,7 +23,7 @@ public abstract class HTTPServer {
     public boolean start() {
         try {
             // Setup server socket and start server thread
-            serverSocket = new ServerSocket(port, BACKLOG, InetAddress.getByName("127.0.0.1"));
+            serverSocket = new ServerSocket(port, BACKLOG);
             acceptingClients = true;
             HTTPServerThread thread = new HTTPServerThread();
             thread.start();
@@ -105,6 +105,24 @@ public abstract class HTTPServer {
         response.setStatusLine("HTTP/1.1 404 Not Found");
         response.setHeader("Content-Type", "text/plain");
         response.addMessage("Not Found");
+        return true;
+    }
+
+    public static boolean sendFile(HTTPRequest request, HTTPResponse response, String path) {
+        if(!(new File(path)).exists()) return errorNotFound(request, response);
+
+        response.setStatusLine("HTTP/1.1 200 OK");
+        response.setHeader("Content-Type", "image/jpeg");
+        try {
+            FileInputStream inputStream = new FileInputStream(path);
+            byte[] buffer = new byte[1024];
+            int n;
+            while ((n = inputStream.read(buffer)) != -1)
+                response.addMessage(buffer, 0, n);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return true;
     }
 

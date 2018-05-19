@@ -4,7 +4,7 @@ import java.io.*;
 
 class DataFile {
 
-    enum Type { Reading, Writing, Closed };
+    enum Type { Reading, Writing, Closed }
 
     private String path;
     private Type type;
@@ -22,8 +22,7 @@ class DataFile {
         try {
             File file = new File(path);
             if(file.exists() && !file.isDirectory()) return;
-            file.getParentFile().mkdirs();
-            file.createNewFile();
+            if(file.getParentFile().mkdirs()) file.createNewFile();
         }
         catch(IOException e) { e.printStackTrace(); }
     }

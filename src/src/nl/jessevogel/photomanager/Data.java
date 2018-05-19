@@ -5,26 +5,25 @@ import nl.jessevogel.photomanager.data.*;
 import java.io.File;
 import java.util.ArrayList;
 
-public class Data {
+class Data {
 
-    private final static String DATA_FOLDER = "_data_"; // TODO: maybe change to ".data" or something to make it hidden?
-    private final static String PICTURES_FOLDER = "pictures";
-    private final static String ALBUMS_FOLDER = "albums";
-    private final static String PEOPLE_FOLDER = "people";
-    private final static String PICTURES_DATA_FILE = "pictures";
-    private final static String ALBUMS_DATA_FILE = "albums";
-    private final static String PEOPLE_DATA_FILE = "people";
-    private final static String DATA_EXTENSION = "txt"; // TODO: ?
-
-    private Controller controller;
+    private static final String DATA_FOLDER = ".data";
+    private static final String PICTURES_FOLDER = "pictures";
+    private static final String ALBUMS_FOLDER = "albums";
+    private static final String PEOPLE_FOLDER = "people";
+    private static final String PICTURES_DATA_FILE = "pictures";
+    private static final String ALBUMS_DATA_FILE = "albums";
+    private static final String PEOPLE_DATA_FILE = "people";
+    private static final String PROFILEPICTURES_FOLDER = "profilepictures";
+    private static final String DATA_EXTENSION = "txt"; // TODO: ?
+    private static final String THUMBS_FOLDER = "thumbs";
 
     private String rootDirectory;
     private ArrayList<Picture> pictures;
     private ArrayList<Album> albums;
     private ArrayList<Person> people;
 
-    Data(Controller controller) {
-        this.controller = controller;
+    Data() {
         rootDirectory = "/Users/jessetvogel/Desktop/test";
     }
 
@@ -53,7 +52,7 @@ public class Data {
     }
 
     private boolean loadPicturesData() {
-        DataFile dataFile = new DataFile(rootDirectory + "/" + DATA_FOLDER + "/" + PICTURES_FOLDER + "/" + PICTURES_DATA_FILE + "." + DATA_EXTENSION);
+        DataFile dataFile = new DataFile(getPicturesDataFile());
         dataFile.touch();
 
         ArrayList<Picture> pictures = new ArrayList<>();
@@ -77,7 +76,7 @@ public class Data {
     }
 
     private boolean storePicturesData() {
-        DataFile dataFile = new DataFile(rootDirectory + "/" + DATA_FOLDER + "/" + PICTURES_FOLDER + "/" + PICTURES_DATA_FILE + "." + DATA_EXTENSION);
+        DataFile dataFile = new DataFile(getPicturesDataFile());
         dataFile.touch();
 
         boolean success = true;
@@ -93,7 +92,7 @@ public class Data {
     }
 
     private boolean loadAlbumData() {
-        DataFile dataFile = new DataFile(rootDirectory + "/" + DATA_FOLDER + "/" + ALBUMS_FOLDER + "/" + ALBUMS_DATA_FILE + "." + DATA_EXTENSION);
+        DataFile dataFile = new DataFile(getAlbumsDataFile());
         dataFile.touch();
 
         ArrayList<Album> albums = new ArrayList<>();
@@ -110,7 +109,7 @@ public class Data {
             albums.add(album);
 
             // Load associations with this album
-            DataFile albumDataFile = new DataFile(rootDirectory + "/" + DATA_FOLDER + "/" + ALBUMS_FOLDER + "/" + album.id + "." + DATA_EXTENSION);
+            DataFile albumDataFile = new DataFile(getAlbumDataFile(album));
             albumDataFile.touch();
             while((line = albumDataFile.readLine()) != null) {
                 int pictureId = Integer.parseInt(line); // TODO: check for NumberFormatException?
@@ -129,7 +128,7 @@ public class Data {
     }
 
     private boolean storeAlbumData() {
-        DataFile dataFile = new DataFile(rootDirectory + "/" + DATA_FOLDER + "/" + ALBUMS_FOLDER + "/" + ALBUMS_DATA_FILE + "." + DATA_EXTENSION);
+        DataFile dataFile = new DataFile(getAlbumsDataFile());
         dataFile.touch();
 
         boolean success = true;
@@ -141,7 +140,7 @@ public class Data {
             }
 
             // Write file containing associations with this person
-            DataFile albumDataFile = new DataFile(rootDirectory + "/" + DATA_FOLDER + "/" + ALBUMS_FOLDER + "/" + album.id + "." + DATA_EXTENSION);
+            DataFile albumDataFile = new DataFile(getAlbumDataFile(album));
             albumDataFile.touch();
             for(Picture picture : album.pictures)
                 albumDataFile.writeLine("" + picture.id);
@@ -153,7 +152,7 @@ public class Data {
     }
 
     private boolean loadPeopleData() {
-        DataFile dataFile = new DataFile(rootDirectory + "/" + DATA_FOLDER + "/" + PEOPLE_FOLDER + "/" + PEOPLE_DATA_FILE + "." + DATA_EXTENSION);
+        DataFile dataFile = new DataFile(getPeopleDataFile());
         dataFile.touch();
 
         ArrayList<Person> people = new ArrayList<>();
@@ -170,7 +169,7 @@ public class Data {
             people.add(person);
 
             // Load associations with this person
-            DataFile personDataFile = new DataFile(rootDirectory + "/" + DATA_FOLDER + "/" + PEOPLE_FOLDER + "/" + person.id + "." + DATA_EXTENSION);
+            DataFile personDataFile = new DataFile(getPersonDataFile(person));
             personDataFile.touch();
             while((line = personDataFile.readLine()) != null) {
                 int pictureId = Integer.parseInt(line); // TODO: check for NumberFormatException?
@@ -189,7 +188,7 @@ public class Data {
     }
 
     private boolean storePeopleData() {
-        DataFile dataFile = new DataFile(rootDirectory + "/" + DATA_FOLDER + "/" + PEOPLE_FOLDER + "/" + PEOPLE_DATA_FILE + "." + DATA_EXTENSION);
+        DataFile dataFile = new DataFile(getPeopleDataFile());
         dataFile.touch();
 
         boolean success = true;
@@ -201,7 +200,7 @@ public class Data {
             }
 
             // Write file containing associations with this person
-            DataFile personDataFile = new DataFile(rootDirectory + "/" + DATA_FOLDER + "/" + PEOPLE_FOLDER + "/" + person.id + "." + DATA_EXTENSION);
+            DataFile personDataFile = new DataFile(getPersonDataFile(person));
             personDataFile.touch();
             for(Picture picture : person.pictures)
                 personDataFile.writeLine("" + picture.id);
@@ -262,6 +261,46 @@ public class Data {
                 return picture;
         }
         return null;
+    }
+
+    String getProfilePicturePath(Person person) {
+        return rootDirectory + "/" + DATA_FOLDER + "/" + PROFILEPICTURES_FOLDER + "/" + person.name + ".jpg";
+    }
+
+    String getThumbPath(Picture picture) {
+        return rootDirectory + "/" + DATA_FOLDER + "/" + THUMBS_FOLDER + "/" + picture.id + ".jpg";
+    }
+
+    String getPicturePath(Picture picture) {
+        return rootDirectory + "/" + getAlbumById(picture.albumId).path + "/" + picture.filename;
+    }
+
+    String getDataFolder() {
+        return rootDirectory + "/" + DATA_FOLDER;
+    }
+
+    String getThumbsFolder() {
+        return rootDirectory + "/" + DATA_FOLDER + "/" + THUMBS_FOLDER;
+    }
+
+    private String getPicturesDataFile() {
+        return rootDirectory + "/" + DATA_FOLDER + "/" + PICTURES_FOLDER + "/" + PICTURES_DATA_FILE + "." + DATA_EXTENSION;
+    }
+
+    private String getAlbumsDataFile() {
+        return rootDirectory + "/" + DATA_FOLDER + "/" + ALBUMS_FOLDER + "/" + ALBUMS_DATA_FILE + "." + DATA_EXTENSION;
+    }
+
+    private String getAlbumDataFile(Album album) {
+        return rootDirectory + "/" + DATA_FOLDER + "/" + ALBUMS_FOLDER + "/" + album.id + "." + DATA_EXTENSION;
+    }
+
+    private String getPeopleDataFile() {
+        return rootDirectory + "/" + DATA_FOLDER + "/" + PEOPLE_FOLDER + "/" + PEOPLE_DATA_FILE + "." + DATA_EXTENSION;
+    }
+
+    private String getPersonDataFile(Person person) {
+        return rootDirectory + "/" + DATA_FOLDER + "/" + PEOPLE_FOLDER + "/" + person.id + "." + DATA_EXTENSION;
     }
 
 }

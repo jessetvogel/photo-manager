@@ -28,6 +28,16 @@
   animation: scalein 0.2s forwards;
 }
 
+.albums-tiles .tile {
+  width: 224px;
+  height: 224px;
+  margin: 8px;
+}
+
+.albums-tiles .tile .title {
+  font-size: 22px;
+}
+
 .person-header, .album-header {
   margin-left: auto;
   margin-right: auto;

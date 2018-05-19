@@ -52,7 +52,12 @@ class Commands {
 
     private boolean commandScan() {
         Scanner scanner = new Scanner(controller);
-        return scanner.scan() && controller.getData().storeData();
+        if (scanner.scan()) {
+            if(!controller.getData().storeData()) {
+                Log.error("Failed to store data!");
+            }
+        }
+        return true;
     }
 
     private boolean commandHelp() {
@@ -70,7 +75,7 @@ class Commands {
     }
 
     private boolean commandData(String[] parts) {
-        if(parts.length < 2) return false;
+        if (parts.length < 2) return false;
 
         if (parts[1].equals("albums")) {
             for (Album album : controller.getData().getAlbums())
@@ -90,11 +95,11 @@ class Commands {
             return true;
         }
 
-        if(parts.length < 3) return false;
+        if (parts.length < 3) return false;
 
         if (parts[1].equals("person")) {
             Person person = controller.getData().getPersonById(Integer.parseInt(parts[2])); // TODO : check if number..
-            if(person == null) {
+            if (person == null) {
                 System.out.println("No person exists with id " + parts[2]);
                 return true;
             }
@@ -107,7 +112,7 @@ class Commands {
 
         if (parts[1].equals("album")) {
             Album album = controller.getData().getAlbumById(Integer.parseInt(parts[2])); // TODO : check if number..
-            if(album == null) {
+            if (album == null) {
                 System.out.println("No album exists with id " + parts[2]);
                 return true;
             }
@@ -120,7 +125,7 @@ class Commands {
 
         if (parts[1].equals("picture")) {
             Picture picture = controller.getData().getPictureById(Integer.parseInt(parts[2])); // TODO : check if number..
-            if(picture == null) {
+            if (picture == null) {
                 System.out.println("No picture exists with id " + parts[2]);
                 return true;
             }
@@ -135,7 +140,7 @@ class Commands {
     }
 
     private boolean commandGet(String[] parts) {
-        if(parts.length != 2) return false;
+        if (parts.length != 2) return false;
 
         if (parts[1].equals("root_directory")) {
             System.out.println(controller.getData().getRootDirectory());
@@ -146,7 +151,7 @@ class Commands {
     }
 
     private boolean commandSet(String[] parts) {
-        if(parts.length != 3) return false;
+        if (parts.length != 3) return false;
 
         if (parts[1].equals("root_directory")) {
             if (!controller.getData().setRootDirectory(parts[2])) {
