@@ -1,6 +1,7 @@
 package nl.jessevogel.photomanager.httpserver;
 
 import nl.jessevogel.photomanager.Log;
+import nl.jessevogel.photomanager.MIMEType;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -108,11 +109,18 @@ public abstract class HTTPServer {
         return true;
     }
 
+    public static boolean errorForbidden(HTTPRequest request, HTTPResponse response) {
+        response.setStatusLine("HTTP/1.1 403 Forbidden");
+        response.setHeader("Content-Type", "text/plain");
+        response.addMessage("Forbidden");
+        return true;
+    }
+
     public static boolean sendFile(HTTPRequest request, HTTPResponse response, String path) {
         if(!(new File(path)).exists()) return errorNotFound(request, response);
 
         response.setStatusLine("HTTP/1.1 200 OK");
-        response.setHeader("Content-Type", "image/jpeg");
+        response.setHeader("Content-Type", MIMEType.getByFile(path));
         try {
             FileInputStream inputStream = new FileInputStream(path);
             byte[] buffer = new byte[1024];

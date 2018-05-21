@@ -10,14 +10,16 @@ public class Main {
         if(!controller.getData().loadData())
             Log.error("Failed to load data!");
 
-        // Start API server
+        // Start API & Web server
         controller.getAPIServer().start();
+        controller.getWebServer().start();
 
         // Read commands
         controller.getCommands().read();
 
-        // Stop API server
+        // Stop API & Web server
         controller.getAPIServer().stop();
+        controller.getWebServer().stop();
     }
 
 }
