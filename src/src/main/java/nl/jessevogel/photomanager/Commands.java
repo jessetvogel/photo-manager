@@ -53,9 +53,8 @@ class Commands {
     private boolean commandScan() {
         Scanner scanner = new Scanner(controller);
         if (scanner.scan()) {
-            if(!controller.getData().storeData()) {
+            if(!controller.getData().storeData())
                 Log.error("Failed to store data!");
-            }
         }
         return true;
     }

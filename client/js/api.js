@@ -1,5 +1,5 @@
 // var apiUrl = 'https://www.robertvankammen.nl:9090';
-var apiUrl = 'http://192.168.2.82:4321';
+var apiUrl = 'http://' + window.location.hostname + ':4321';
 
 function apiRequest(endpoint, callback) {
   $.ajax({

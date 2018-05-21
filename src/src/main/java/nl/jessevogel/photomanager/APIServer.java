@@ -69,7 +69,9 @@ class APIServer extends HTTPServer {
         response.setHeader("Content-Type", "application/json");
         response.addMessage("[");
         boolean first = true;
-        for (Person person : controller.getData().getPeople()) {
+        ArrayList<Person> people = controller.getData().getPeople();
+        people.sort((p1, p2) -> (p2.pictures.size() - p1.pictures.size()));
+        for (Person person : people) {
             if (!first) response.addMessage(",");
             first = false;
             response.addMessage("{"

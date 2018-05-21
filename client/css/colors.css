@@ -1,0 +1,20 @@
+:root {
+	
+	/* Colors taken from Material Design color palette:
+	 * https://material.io/design/color/the-color-system.html
+	 */
+
+	--menu-background-color: #263238;
+	--menu-text-color: #CFD8DC;
+	--menu-button-hover-background-color: rgba(255, 255, 255, 0.10);
+
+	--content-background-color: #EFEBE9;
+	--content-text-color: #212121;
+
+	--text-color-green: #4CAF50;
+	--text-color-red: #B71C1C;
+
+	--overlay-background-color: rgba(0, 0, 0, 0.75);
+
+	--transparent-background-color: rgba(0, 0, 0, 0.1);
+}

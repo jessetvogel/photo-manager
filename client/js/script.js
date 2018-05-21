@@ -3,7 +3,7 @@ $(document).ready(function () {
   checkHealthStatus();
   setInterval(checkHealthStatus, 5000);
 
-  // Click events sidebar buttons
+  // Click events menu buttons
   $('#button-people').click(loadPeople);
   $('#button-albums').click(loadAlbums);
 });
@@ -338,7 +338,7 @@ function loadProfilePicture(id, callback) {
 
   // In case this person has no picture
   if(profilePictureData == false) {
-    callback('/img/profile-picture-default.png');
+    // callback('/img/profile-picture-default.png');
     return;
   }
 
