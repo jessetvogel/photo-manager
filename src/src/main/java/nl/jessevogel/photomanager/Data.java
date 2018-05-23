@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 class Data {
 
+    private static final String SEPARATOR = File.separator;
     private static final String DATA_FOLDER = ".data";
     private static final String PICTURES_FOLDER = "pictures";
     private static final String ALBUMS_FOLDER = "albums";
@@ -264,43 +265,43 @@ class Data {
     }
 
     String getProfilePicturePath(Person person) {
-        return rootDirectory + "/" + DATA_FOLDER + "/" + PROFILEPICTURES_FOLDER + "/" + person.name + ".jpg";
+        return rootDirectory + SEPARATOR + DATA_FOLDER + SEPARATOR + PROFILEPICTURES_FOLDER + SEPARATOR + person.name + ".jpg";
     }
 
     String getThumbPath(Picture picture) {
-        return rootDirectory + "/" + DATA_FOLDER + "/" + THUMBS_FOLDER + "/" + picture.id + ".jpg";
+        return rootDirectory + SEPARATOR + DATA_FOLDER + SEPARATOR + THUMBS_FOLDER + SEPARATOR + picture.id + ".jpg";
     }
 
     String getPicturePath(Picture picture) {
-        return rootDirectory + "/" + getAlbumById(picture.albumId).path + "/" + picture.filename;
+        return rootDirectory + SEPARATOR + getAlbumById(picture.albumId).path + SEPARATOR + picture.filename;
     }
 
     String getDataFolder() {
-        return rootDirectory + "/" + DATA_FOLDER;
+        return rootDirectory + SEPARATOR + DATA_FOLDER;
     }
 
     String getThumbsFolder() {
-        return rootDirectory + "/" + DATA_FOLDER + "/" + THUMBS_FOLDER;
+        return rootDirectory + SEPARATOR + DATA_FOLDER + SEPARATOR + THUMBS_FOLDER;
     }
 
     private String getPicturesDataFile() {
-        return rootDirectory + "/" + DATA_FOLDER + "/" + PICTURES_FOLDER + "/" + PICTURES_DATA_FILE + "." + DATA_EXTENSION;
+        return rootDirectory + SEPARATOR + DATA_FOLDER + SEPARATOR + PICTURES_FOLDER + SEPARATOR + PICTURES_DATA_FILE + "." + DATA_EXTENSION;
     }
 
     private String getAlbumsDataFile() {
-        return rootDirectory + "/" + DATA_FOLDER + "/" + ALBUMS_FOLDER + "/" + ALBUMS_DATA_FILE + "." + DATA_EXTENSION;
+        return rootDirectory + SEPARATOR + DATA_FOLDER + SEPARATOR + ALBUMS_FOLDER + SEPARATOR + ALBUMS_DATA_FILE + "." + DATA_EXTENSION;
     }
 
     private String getAlbumDataFile(Album album) {
-        return rootDirectory + "/" + DATA_FOLDER + "/" + ALBUMS_FOLDER + "/" + album.id + "." + DATA_EXTENSION;
+        return rootDirectory + SEPARATOR + DATA_FOLDER + SEPARATOR + ALBUMS_FOLDER + SEPARATOR + album.id + "." + DATA_EXTENSION;
     }
 
     private String getPeopleDataFile() {
-        return rootDirectory + "/" + DATA_FOLDER + "/" + PEOPLE_FOLDER + "/" + PEOPLE_DATA_FILE + "." + DATA_EXTENSION;
+        return rootDirectory + SEPARATOR + DATA_FOLDER + SEPARATOR + PEOPLE_FOLDER + SEPARATOR + PEOPLE_DATA_FILE + "." + DATA_EXTENSION;
     }
 
     private String getPersonDataFile(Person person) {
-        return rootDirectory + "/" + DATA_FOLDER + "/" + PEOPLE_FOLDER + "/" + person.id + "." + DATA_EXTENSION;
+        return rootDirectory + SEPARATOR + DATA_FOLDER + SEPARATOR + PEOPLE_FOLDER + SEPARATOR + person.id + "." + DATA_EXTENSION;
     }
 
 }
