@@ -9,6 +9,7 @@ import nl.jessevogel.photomanager.httpserver.HTTPServer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -160,9 +161,12 @@ class APIServer extends HTTPServer {
         // Construct array list
         ArrayList<Picture> arrayPictures = new ArrayList<>();
         if (pictures != null) arrayPictures.addAll(pictures);
-        int size = arrayPictures.size();
+
+        // Sort on name (TODO: sorting options?)
+        arrayPictures.sort(Comparator.comparing(p -> p.filename));
 
         // Determine start and amount
+        int size = arrayPictures.size();
         int start = request.getQueryInteger("start", 0);
         int amount = request.getQueryInteger("amount", 10);
 

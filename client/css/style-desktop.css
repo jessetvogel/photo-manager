@@ -30,11 +30,11 @@
   margin: 16px;
 }
 
-.people-tiles .tile, .albums-tiles .tile, .person-pictures .picture, .album-pictures .picture {
+.people-tiles .tile, .albums-tiles .tile, .pictures-feed .picture {
   transition: 0.2s;
 }
 
-.people-tiles .tile:hover, .albums-tiles .tile:hover, .person-pictures .picture:hover, .album-pictures .picture:hover {
+.people-tiles .tile:hover, .albums-tiles .tile:hover, .pictures-feed .picture:hover {
   transform: scale(1.05);
 }
 
@@ -69,17 +69,17 @@
   font-size: 48px;
 }
 
-.person-pictures .picture, .album-pictures .picture {
+.pictures-feed .picture {
   width: 256px;
   padding-bottom: 256px;
   margin: 6px;
 }
 
-.person-pictures .picture:hover, .album-pictures .picture:hover {
+.pictures-feed .picture:hover {
   animation: scalein 0.2s forwards;
 }
 
-.overlay .picture-large {
+.overlay .picture {
   max-width: 80%;
   max-height: 95%;
 }

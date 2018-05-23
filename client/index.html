@@ -13,14 +13,18 @@
 		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		<script type="text/javascript" src="js/api.js"></script>
 		<script type="text/javascript" src="js/script.js"></script>
+		<script type="text/javascript" src="js/data.js"></script>
+		<script type="text/javascript" src="js/feed.js"></script>
+		<script type="text/javascript" src="js/status.js"></script>
+		<script type="text/javascript" src="js/overlay.js"></script>
 	</head>
 	<body>
 		<div id="container">
 
 			<div id="menu">
 				<div class="logo"><img class="logo" src="img/icon.png" /></div>
-				<div class="button" id="button-albums">Albums</div>
-				<div class="button" id="button-people">People</div>
+				<div class="button" onclick="loadAlbums()" id="button-albums">Albums</div>
+				<div class="button" onclick="loadPeople()" id="button-people">People</div>
 				<!-- <div class="button" id="button-tags">Tags</div> -->
 			</div>
 

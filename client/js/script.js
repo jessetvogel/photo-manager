@@ -1,28 +1,3 @@
-$(document).ready(function () {
-  // Check server health every now and then
-  checkHealthStatus();
-  setInterval(checkHealthStatus, 5000);
-
-  // Click events menu buttons
-  $('#button-people').click(loadPeople);
-  $('#button-albums').click(loadAlbums);
-});
-
-function checkHealthStatus() {
-  apiHealth(function (healthy) {
-    setHealthStatus(healthy);
-  });
-}
-
-function setHealthStatus(healthy) {
-  if(healthy) {
-    $('#health').html('').append($('<span>').addClass('glyphicon glyphicon-signal')).append($('<span>').text('online')).addClass('healthy').removeClass('unhealthy');
-  }
-  else {
-    $('#health').html('').append($('<span>').addClass('	glyphicon glyphicon-exclamation-sign')).append($('<span>').text('offline')).addClass('unhealthy').removeClass('healthy');
-  }
-}
-
 function loadPeople() {
   // Construct content
   var content = $('<div>').addClass('content-people');
@@ -30,9 +5,9 @@ function loadPeople() {
   var peopleTiles = $('<div>').addClass('people-tiles').append($('<div>').addClass('loading'));
 
   // Search bar
-  peopleSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by name').keyup(function () {
+  peopleSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by name').keyup(() => {
     var searchTerm = $(this).val().toLowerCase();
-    $('.people-tiles .tile').each(function () {
+    $('.people-tiles .tile').each(() => {
       if(searchMatch($(this).find('.name').text(), searchTerm))
         $(this).show();
       else
@@ -46,30 +21,22 @@ function loadPeople() {
   $('#content').html(content);
 
   // Get list of people
-  apiPeople(function (data) {
+  apiPeople((_data) => {
     // Clear peopleTiles
-    peopleTiles.html('').hide();
+    peopleTiles.empty().hide();
 
     // Create tiles
-    for(var i = 0;i < data.length; ++i) {
+    for(var i = 0;i < _data.length; ++i) {
       // Set some people data
-      setData('person' + data[i].id, 'name', data[i].name);
-      setData('person' + data[i].id, 'profilePicture', data[i].profilePicture);
+      data.set('person' + _data[i].id, 'name', _data[i].name);
+      data.set('person' + _data[i].id, 'profilePicture', _data[i].profilePicture);
 
       // Set tile content
-      var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(data[i].name));
-      (function (tile) {
-        loadProfilePicture(data[i].id, function (data) {
-          tile.css({ backgroundImage: 'url(' + data + ')' });
-        });
-      })(tile);
+      var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(_data[i].name));
+      ((tile) => loadProfilePicture(_data[i].id, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
 
       // Click event
-      (function (id) {
-        tile.click(function () {
-          loadPerson(id);
-        });
-      })(data[i].id);
+      ((id) => tile.click(() => setContentPerson(id)))(_data[i].id);
 
       // Add to tiles
       peopleTiles.append(tile);
@@ -87,9 +54,9 @@ function loadAlbums() {
   var albumsTiles = $('<div>').addClass('albums-tiles').append($('<div>').addClass('loading'));
 
   // Search bar
-  albumsSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by title').keyup(function () {
+  albumsSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by title').keyup(() => {
     var searchTerm = $(this).val().toLowerCase();
-    $('.albums-tiles .tile').each(function () {
+    $('.albums-tiles .tile').each(() => {
       if(searchMatch($(this).find('.title').text(), searchTerm))
         $(this).show();
       else
@@ -103,30 +70,22 @@ function loadAlbums() {
   $('#content').html(content);
 
   // Get list of albums
-  apiAlbums(function (data) {
+  apiAlbums((_data) => {
     // Clear peopleTiles
-    albumsTiles.html('').hide();
+    albumsTiles.empty().hide();
 
     // Create tiles
-    for(var i = 0;i < data.length; ++i) {
+    for(var i = 0;i < _data.length; ++i) {
       // Set some album data
-      setData('album' + data[i].id, 'title', data[i].title);
-      setData('album' + data[i].id, 'coverPicture', null);
+      data.set('album' + _data[i].id, 'title', _data[i].title);
+      data.set('album' + _data[i].id, 'coverPicture', null);
 
       // Set tile content
-      var tile = $('<div>').addClass('tile').append($('<span>').addClass('title').text(data[i].title));
-      (function (tile) {
-        loadCoverPicture(data[i].id, function (data) {
-          tile.css({ backgroundImage: 'url(' + data + ')' });
-        });
-      })(tile);
+      var tile = $('<div>').addClass('tile').append($('<span>').addClass('title').text(_data[i].title));
+      ((tile) => loadCoverPicture(_data[i].id, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
 
       // Click event
-      (function (id) {
-        tile.click(function () {
-          loadAlbum(id);
-        });
-      })(data[i].id);
+      ((id) => tile.click(() => setContentAlbum(id)))(_data[i].id);
 
       // Add to tiles
       albumsTiles.append(tile);
@@ -137,204 +96,51 @@ function loadAlbums() {
   });
 }
 
-function loadPerson(id) {
+function setContentPerson(personId) {
   // Construct content
   var content = $('<div>').addClass('content-person');
   var personHeader = $('<div>').addClass('person-header');
-  var personPictures = $('<div>').addClass('person-pictures');
-  var personPicturesEnd = $('<div>').addClass('feed-pictures-end');
+  var picturesList = $('<div>').addClass('pictures-feed');
+  var picturesListEnd = $('<div>').addClass('pictures-feed-end');
 
   // Person header
-  var personProfilePicture = $('<div>').addClass('person-profile-picture');
-  personHeader.append(personProfilePicture);
-  personHeader.append($('<div>').addClass('person-name').text(getData('person' + id, 'name')));
-  loadProfilePicture(id, function (data) {
-    personProfilePicture.css({ backgroundImage: 'url(' + data + ')'});
-  });
-
-  // Set interval to check if should load new batch TODO: is there a better way?
-  var t = setInterval(function () {
-    if($('.content-person').length == 0) {
-      clearInterval(t);
-      return;
-    }
-    if(!loadingBatch && checkShouldLoadNewBatch()) {
-      loadPersonPicturesBatch(id, PICTURES_PER_BATCH);
-    }
-  }, 100);
+  var profilePicture = $('<div>').addClass('person-profile-picture');
+  personHeader.append(profilePicture);
+  personHeader.append($('<div>').addClass('person-name').text(data.get('person' + personId, 'name')));
+  loadProfilePicture(personId, (data) => profilePicture.css({ backgroundImage: 'url(' + data + ')'}));
 
   // Set content
   content.append(personHeader);
-  content.append(personPictures);
-  content.append(personPicturesEnd);
+  content.append(picturesList);
+  content.append(picturesListEnd);
   $('#content').html(content);
 
-  reachedEndOfFeed = false;
-  loadPersonPicturesBatch(id, PICTURES_PER_BATCH);
+  // Start feed
+  feed.start({ people: [personId] });
 }
 
-function loadAlbum(id) {
+function setContentAlbum(albumId) {
   // Construct content
   var content = $('<div>').addClass('content-album');
   var albumHeader = $('<div>').addClass('album-header');
-  var albumPictures = $('<div>').addClass('album-pictures');
-  var albumPicturesEnd = $('<div>').addClass('feed-pictures-end');
+  var picturesList = $('<div>').addClass('pictures-feed');
+  var picturesListEnd = $('<div>').addClass('pictures-feed-end');
 
   // Album header
-  albumHeader.append($('<div>').addClass('album-title').text(getData('album' + id, 'title')));
-
-  // Set interval to check if should load new batch TODO: is there a better way?
-  var t = setInterval(function () {
-    if($('.content-album').length == 0) {
-      clearInterval(t);
-      return;
-    }
-    if(!loadingBatch && checkShouldLoadNewBatch()) {
-      loadAlbumPicturesBatch(id, PICTURES_PER_BATCH);
-    }
-  }, 100);
+  albumHeader.append($('<div>').addClass('album-title').text(data.get('album' + albumId, 'title')));
 
   // Set content
   content.append(albumHeader);
-  content.append(albumPictures);
-  content.append(albumPicturesEnd);
+  content.append(picturesList);
+  content.append(picturesListEnd);
   $('#content').html(content);
 
-  reachedEndFeed = false;
-  loadAlbumPicturesBatch(id, PICTURES_PER_BATCH);
-}
-
-var PICTURES_PER_BATCH = 12;
-var loadingBatch = false;
-var reachedEndFeed = false;
-
-function checkShouldLoadNewBatch() {
-  return (!reachedEndFeed && $('.feed-pictures-end').offset().top < $('body').height());
-}
-
-function loadPersonPicturesBatch(id, amount) {
-  // Indicate a batch is being loaded
-  loadingBatch = true;
-
-  // Add loading icon
-  $('.feed-pictures-end').append($('<div>').addClass('loading'));
-
-  // Load pictures
-  var start = $('.person-pictures .picture').length;
-  apiSearch({ people: [ id ] }, start, amount, function (data) {
-    // Check if any pictures were returned
-    if(data.pictures.length == 0) {
-      reachedEndOfFeed = true;
-      $('.feed-pictures-end').html($('<span>').addClass('text-end-of-feed').text('~'));
-      return;
-    }
-
-    // Create pictures
-    for(var i = 0;i < data.pictures.length; ++i) {
-      // Set picture content
-      var picture = $('<div>').addClass('picture');
-
-      // Click event
-      (function (picture) {
-        apiPicture(data.pictures[i].id, 'small', function (data) {
-          picture.css({ backgroundImage: 'url(' + data + ')'});
-          picture.click(function () {
-            overlay($('<img>').addClass('picture-large').prop('src', data));
-          });
-        });
-      })(picture);
-
-      // Add to pictures
-      $('.person-pictures').append(picture);
-    }
-
-    // Remove loading icon
-    $('.feed-pictures-end').html('');
-
-    // Check if a new batch should be loaded
-    if(checkShouldLoadNewBatch()) {
-      loadPersonPicturesBatch(id, PICTURES_PER_BATCH);
-    }
-    else {
-      // Indicate no batch is being loaded anymore
-      loadingBatch = false;
-    }
-  });
-}
-
-function loadAlbumPicturesBatch(id, amount) {
-  // Indicate a batch is being loaded
-  loadingBatch = true;
-
-  // Add loading icon
-  $('.feed-pictures-end').append($('<div>').addClass('loading'));
-
-  // Load pictures
-  var start = $('.album-pictures .picture').length;
-  apiSearch({ albums: [ id ] }, start, amount, function (data) {
-    // Check if any pictures were returned
-    if(data.pictures.length == 0) {
-      reachedEndOfFeed = true;
-      $('.feed-pictures-end').html($('<span>').addClass('text-end-of-feed').text('~'));
-      return;
-    }
-
-    // Create pictures
-    for(var i = 0;i < data.pictures.length; ++i) {
-      // Set picture content
-      var picture = $('<div>').addClass('picture');
-
-      // Click event
-      (function (picture) {
-        apiPicture(data.pictures[i].id, 'small', function (data) {
-          picture.css({ backgroundImage: 'url(' + data + ')'});
-          picture.click(function () {
-            overlay($('<img>').addClass('picture-large').prop('src', data));
-          });
-        });
-      })(picture);
-
-      // Add to pictures
-      $('.album-pictures').append(picture);
-    }
-
-    // Remove loading icon
-    $('.feed-pictures-end').html('');
-
-    // Check if a new batch should be loaded
-    if(checkShouldLoadNewBatch()) {
-      loadAlbumPicturesBatch(id, PICTURES_PER_BATCH);
-    }
-    else {
-      // Indicate no batch is being loaded anymore
-      loadingBatch = false;
-    }
-  });
-}
-
-function overlay(content) {
-  // Create overlay
-  var overlay = $('<div>').addClass('overlay').click(function() { $(this).remove(); }).append($('<span>').addClass('glyphicon glyphicon-remove overlay-exit').click(function () { $(this).parent().remove(); })).append(content);
-
-  // Append to body
-  $('body').append(overlay);
-}
-
-var data = {};
-
-function getData(id, key) {
-  if(data[id] == undefined) data[id] = {};
-  if(data[id][key] == undefined) return null;
-  return data[id][key];
-}
-
-function setData(id, key, value) {
-  if(data[id] == undefined) data[id] = {};
-  data[id][key] = value;
+  // Start feed
+  feed.start({ albums: [albumId] });
 }
 
 function loadProfilePicture(id, callback) {
-  var profilePictureData = getData('person' + id, 'profilePicture');
+  var profilePictureData = data.get('person' + id, 'profilePicture');
 
   // In case this person has no picture
   if(profilePictureData == false) {
@@ -351,16 +157,16 @@ function loadProfilePicture(id, callback) {
   // Otherwise, load the picture
   else {
     (function (id, callback) {
-      apiProfilePicture(id, function (data) {
-        setData('person' + id, 'profilePicture', data);
-        callback(data);
+      apiProfilePicture(id, (_data) => {
+        data.set('person' + id, 'profilePicture', _data);
+        callback(_data);
       });
     })(id, callback);
   }
 }
 
 function loadCoverPicture(id, callback) {
-  var coverPictureData = getData('album' + id, 'coverPicture');
+  var coverPictureData = data.get('album' + id, 'coverPicture');
 
   // In case the picture is already loaded
   if(coverPictureData != null) {
@@ -370,13 +176,14 @@ function loadCoverPicture(id, callback) {
 
   // Otherwise, load the picture
   (function (id, callback) {
-      apiCoverPicture(id, function (data) {
-        setData('album' + id, 'coverPicture', data);
-        callback(data);
+      apiCoverPicture(id, (_data) => {
+        data.set('album' + id, 'coverPicture', _data);
+        callback(_data);
       });
     })(id, callback);
 }
 
+// * UTIL *
 function searchMatch(string, searchTerm) {
   return simplifyString(string).includes(simplifyString(searchTerm));
 }
