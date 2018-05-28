@@ -20,6 +20,9 @@ public class Main {
         // Stop API & Web server
         controller.getAPIServer().stop();
         controller.getWebServer().stop();
+
+        // Store data TODO: this should not be here
+        controller.getData().storeData();
     }
 
 }

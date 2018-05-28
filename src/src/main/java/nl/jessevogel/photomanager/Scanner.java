@@ -1,17 +1,17 @@
 package nl.jessevogel.photomanager;
 
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.xmp.XmpDirectory;
+import nl.jessevogel.jfifmetadata.JFIFImage;
+import nl.jessevogel.jfifmetadata.JFIFReader;
+import nl.jessevogel.jfifmetadata.segments.APP1Segment;
+import nl.jessevogel.jfifmetadata.segments.Segment;
 import nl.jessevogel.photomanager.data.Album;
 import nl.jessevogel.photomanager.data.Person;
 import nl.jessevogel.photomanager.data.Picture;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 
 class Scanner {
 
@@ -19,16 +19,11 @@ class Scanner {
 
     private ArrayList<String> allowedExtensions;
 
-    private int currentPictureId;
-    private int currentAlbumId;
-    private int currentPersonId;
-
     Scanner(Controller controller) {
         this.controller = controller;
         allowedExtensions = new ArrayList<>();
         allowedExtensions.add("jpg");
         allowedExtensions.add("jpeg");
-        allowedExtensions.add("png");
     }
 
     boolean scan() {
@@ -38,11 +33,6 @@ class Scanner {
          * Step 2. Retreiving metadata
          * Step 3. Create smaller versions / thumbnails
          */
-
-        // Reset counters
-        currentPictureId = 0;
-        currentAlbumId = 0;
-        currentPersonId = 0;
 
         // Make sure the current root directory is a directory
         File directory = new File(controller.getData().getRootDirectory());
@@ -75,15 +65,15 @@ class Scanner {
         }
         Log.println("");
 
-        Log.print("Creating thumbnails...   0%");
-        index = 0;
-        (new File(controller.getData().getThumbsFolder())).mkdir();
-        for (Picture picture : pictures) {
-            success = success & resizePicture(picture);
-            index++;
-            if (index * 100 / N > (index - 1) * 100 / N) Log.updatePercentage(index * 100 / N);
-        }
-        Log.println("");
+//        Log.print("Creating thumbnails...   0%");
+//        index = 0;
+//        (new File(controller.getData().getThumbsFolder())).mkdir();
+//        for (Picture picture : pictures) {
+//            success = success & resizePicture(picture);
+//            index++;
+//            if (index * 100 / N > (index - 1) * 100 / N) Log.updatePercentage(index * 100 / N);
+//        }
+//        Log.println("");
 
         Log.println("Scanning complete!");
 
@@ -119,22 +109,12 @@ class Scanner {
                 // If this directory does not have an associated album, create one
                 if (album == null) {
                     album = controller.getData().getAlbumByPath(directoryPath);
-                    if (album == null) {
-                        album = new Album();
-                        album.id = currentAlbumId ++;
-                        album.title = file.getParentFile().getName();
-                        album.path = directoryPath;
-                        controller.getData().getAlbums().add(album);
-                    }
+                    if (album == null) album = controller.getData().createAlbum(file.getParentFile().getName(), directoryPath);
                 }
 
                 // Create a new picture object
-                Picture picture = new Picture();
-                picture.id = currentPictureId ++;
-                picture.albumId = album.id;
-                picture.filename = file.getName();
+                Picture picture = controller.getData().createPicture(album.id, file.getName());
                 album.pictures.add(picture);
-                controller.getData().getPictures().add(picture);
             }
         }
 
@@ -156,26 +136,54 @@ class Scanner {
             return false;
         }
 
-        try {
-            // Look for people in metadata
-            Metadata metadata = ImageMetadataReader.readMetadata(file);
-            for (XmpDirectory xmpDirectory : metadata.getDirectoriesOfType(XmpDirectory.class)) {
-                for (Map.Entry<String, String> entry : xmpDirectory.getXmpProperties().entrySet()) {
-                    if (!entry.getKey().endsWith("mwg-rs:Name")) continue;
+//        try {
+//            // Look for people in metadata
+//            Metadata metadata = ImageMetadataReader.readMetadata(file);
+//            for (XmpDirectory xmpDirectory : metadata.getDirectoriesOfType(XmpDirectory.class)) {
+//                for (Map.Entry<String, String> entry : xmpDirectory.getXmpProperties().entrySet()) {
+//                    if (!entry.getKey().endsWith("mwg-rs:Name")) continue;
+//
+//                    // Find corresponding person (create one if does not exist)
+//                    String name = entry.getValue();
+//                    Person person = controller.getData().getPersonByName(name);
+//                    if (person == null) {
+//                        person = new Person();
+//                        person.id = currentPersonId ++;
+//                        person.name = name;
+//                        controller.getData().getPeople().add(person);
+//                    }
+//                    person.pictures.add(picture);
+//                }
+//            }
+//        } catch (IOException | ImageProcessingException e) {
+//            e.printStackTrace();
+//        }
 
-                    // Find corresponding person (create one if does not exist)
-                    String name = entry.getValue();
+        try {
+            // Read image for metadata
+            JFIFReader reader = new JFIFReader();
+            JFIFImage image = reader.readMetaData(file.getAbsolutePath());
+
+            // Look for custom data tag
+            for(Segment segment : image.getSegments()) {
+                // Only consider 0xE1 segments
+                if(segment.getMarkerCode() != 0xE1) continue;
+                APP1Segment app1Segment = (APP1Segment) segment;
+                if(!app1Segment.segmentHeader.equals("photomanager")) continue;
+
+                // Look for people tagged in image
+                JSONObject jsonObject = new JSONObject(new String(app1Segment.segmentData, "UTF-8"));
+                if(!jsonObject.has("people")) continue;
+                JSONArray peopleArray = jsonObject.getJSONArray("people");
+                int length = peopleArray.length();
+                for(int i = 0;i < length; ++i) {
+                    String name = peopleArray.getString(i);
                     Person person = controller.getData().getPersonByName(name);
-                    if (person == null) {
-                        person = new Person();
-                        person.id = currentPersonId ++;
-                        person.name = name;
-                        controller.getData().getPeople().add(person);
-                    }
+                    if (person == null) person = controller.getData().createPerson(name);
                     person.pictures.add(picture);
                 }
             }
-        } catch (IOException | ImageProcessingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

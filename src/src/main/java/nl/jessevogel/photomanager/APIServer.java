@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class APIServer extends HTTPServer {
 
@@ -40,6 +42,8 @@ class APIServer extends HTTPServer {
         if (URIPath.equals("/people")) return people(request, response);
         if (URIPath.equals("/albums")) return albums(request, response);
         if (URIPath.matches("^\\/pictures\\/\\d+$")) return picture(request, response);
+        if (URIPath.matches("^\\/pictures\\/\\d+\\/tag$")) return tag(request, response);
+        if (URIPath.matches("^\\/pictures\\/\\d+\\/untag$")) return untag(request, response);
         if (URIPath.matches("^\\/people\\/\\d+\\/profilepicture$")) return profilePicture(request, response);
         if (URIPath.matches("^\\/albums\\/\\d+\\/cover")) return cover(request, response);
         if (URIPath.equals("/people")) return people(request, response);
@@ -115,6 +119,90 @@ class APIServer extends HTTPServer {
             path = controller.getData().getPicturePath(picture);
 
         return sendFile(request, response, path);
+    }
+
+    private boolean tag(HTTPRequest request, HTTPResponse response) {
+        try {
+            // Get picture
+            Pattern pattern = Pattern.compile("^\\/pictures\\/(\\d+)\\/tag$");
+            Matcher m = pattern.matcher(request.getURIPath());
+            if (!m.find()) return errorBadRequest(request, response); // TODO
+            int pictureId = Integer.parseInt(m.group(1));
+            Picture picture = controller.getData().getPictureById(pictureId);
+            if (picture == null) return errorNotFound(request, response);
+
+            // Get people
+            String queryNames = request.getQuery("names");
+            if (queryNames == null) return errorBadRequest(request, response);
+            queryNames = java.net.URLDecoder.decode(queryNames, "UTF-8");
+            String[] names = queryNames.split(",");
+            ArrayList<Person> people = new ArrayList<>();
+            for (String name : names) {
+                // Get or create person by name
+                Person person = controller.getData().getPersonByName(name);
+                if (person == null) person = controller.getData().createPerson(name);
+                people.add(person);
+
+                // Add picture to person
+                person.pictures.add(picture);
+            }
+
+            // Tag people in image
+            Tagger tagger = new Tagger();
+            if(!tagger.tagPeople(controller.getData().getPicturePath(picture), people))
+                return errorInternalServerError(request, response);
+
+            // Send response
+            response.setStatusLine("HTTP/1.1 200 OK");
+            response.setHeader("Content-Type", "application/json");
+            response.addMessage("{\"response\":\"successfully tagged people in picture\"}");
+            return true;
+        }
+        catch (Exception e) {
+            return errorBadRequest(request, response);
+        }
+    }
+
+    private boolean untag(HTTPRequest request, HTTPResponse response) {
+        try {
+            // Get picture
+            Pattern pattern = Pattern.compile("^\\/pictures\\/(\\d+)\\/untag$");
+            Matcher m = pattern.matcher(request.getURIPath());
+            if (!m.find()) return errorBadRequest(request, response); // TODO
+            int pictureId = Integer.parseInt(m.group(1));
+            Picture picture = controller.getData().getPictureById(pictureId);
+            if (picture == null) return errorNotFound(request, response);
+
+            // Get people
+            String queryNames = request.getQuery("names");
+            if (queryNames == null) return errorBadRequest(request, response);
+            queryNames = java.net.URLDecoder.decode(queryNames, "UTF-8");
+            String[] names = queryNames.split(",");
+            ArrayList<Person> people = new ArrayList<>();
+            for (String name : names) {
+                // Get or create person by name
+                Person person = controller.getData().getPersonByName(name);
+                if (person == null) person = controller.getData().createPerson(name);
+                people.add(person);
+
+                // Remove picture from person
+                person.pictures.remove(picture);
+            }
+
+            // Tag people in image
+            Tagger tagger = new Tagger();
+            if(!tagger.untagPeople(controller.getData().getPicturePath(picture), people))
+                return errorInternalServerError(request, response);
+
+            // Send response
+            response.setStatusLine("HTTP/1.1 200 OK");
+            response.setHeader("Content-Type", "application/json");
+            response.addMessage("{\"response\":\"successfully untagged people in picture\"}");
+            return true;
+        }
+        catch (Exception e) {
+            return errorBadRequest(request, response);
+        }
     }
 
     private boolean search(HTTPRequest request, HTTPResponse response) {

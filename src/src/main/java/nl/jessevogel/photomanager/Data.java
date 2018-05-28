@@ -24,8 +24,18 @@ class Data {
     private ArrayList<Album> albums;
     private ArrayList<Person> people;
 
+    private int currentPictureId;
+    private int currentAlbumId;
+    private int currentPersonId;
+
     Data() {
+        // Default root directory TODO: change this
         rootDirectory = "/Users/jessetvogel/Desktop/test";
+
+        // Initialize id counters
+        currentPictureId = 0;
+        currentAlbumId = 0;
+        currentPersonId = 0;
     }
 
     boolean setRootDirectory(String directory) {
@@ -59,6 +69,7 @@ class Data {
         ArrayList<Picture> pictures = new ArrayList<>();
         String line;
         boolean success = true;
+        int maxPictureId = -1;
         while ((line = dataFile.readLine()) != null) {
             Picture picture = new Picture();
             if (!picture.set(line)) {
@@ -67,11 +78,15 @@ class Data {
                 break;
             }
             pictures.add(picture);
+
+            maxPictureId = Math.max(maxPictureId, picture.id);
         }
         dataFile.close();
 
-        if (success)
+        if (success) {
             this.pictures = pictures;
+            currentPictureId = Math.max(currentPictureId, maxPictureId + 1);
+        }
 
         return success;
     }
@@ -99,6 +114,7 @@ class Data {
         ArrayList<Album> albums = new ArrayList<>();
         String line;
         boolean success = true;
+        int maxAlbumId = -1;
         while ((line = dataFile.readLine()) != null) {
             // Each line represents an album
             Album album = new Album();
@@ -119,11 +135,16 @@ class Data {
                 album.pictures.add(picture);
             }
             albumDataFile.close();
+
+            // Keep track of max album id
+            maxAlbumId = Math.max(maxAlbumId, album.id);
         }
         dataFile.close();
 
-        if (success)
+        if (success) {
             this.albums = albums;
+            currentAlbumId = Math.max(currentAlbumId, maxAlbumId + 1);
+        }
 
         return success;
     }
@@ -159,6 +180,7 @@ class Data {
         ArrayList<Person> people = new ArrayList<>();
         String line;
         boolean success = true;
+        int maxPersonId = -1;
         while ((line = dataFile.readLine()) != null) {
             // Each line represents a person
             Person person = new Person();
@@ -179,11 +201,16 @@ class Data {
                 person.pictures.add(picture);
             }
             personDataFile.close();
+
+            // Keep track of max person id
+            maxPersonId = Math.max(maxPersonId, person.id);
         }
         dataFile.close();
 
-        if (success)
+        if (success) {
             this.people = people;
+            currentPersonId = Math.max(currentPersonId, maxPersonId + 1);
+        }
 
         return success;
     }
@@ -304,4 +331,29 @@ class Data {
         return rootDirectory + SEPARATOR + DATA_FOLDER + SEPARATOR + PEOPLE_FOLDER + SEPARATOR + person.id + "." + DATA_EXTENSION;
     }
 
+    public Picture createPicture(int albumId, String filename) {
+        Picture picture = new Picture();
+        picture.id = currentPictureId ++;
+        picture.albumId = albumId;
+        picture.filename = filename;
+        pictures.add(picture);
+        return picture;
+    }
+
+    public Person createPerson(String name) {
+        Person person = new Person();
+        person.id = currentPersonId ++;
+        person.name = name;
+        people.add(person);
+        return person;
+    }
+
+    public Album createAlbum(String title, String path) {
+        Album album = new Album();
+        album.id = currentAlbumId ++;
+        album.title = title;
+        album.path = path;
+        albums.add(album);
+        return album;
+    }
 }

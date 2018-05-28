@@ -102,6 +102,13 @@ public abstract class HTTPServer {
         return true;
     }
 
+    public static boolean errorForbidden(HTTPRequest request, HTTPResponse response) {
+        response.setStatusLine("HTTP/1.1 403 Forbidden");
+        response.setHeader("Content-Type", "text/plain");
+        response.addMessage("Forbidden");
+        return true;
+    }
+
     public static boolean errorNotFound(HTTPRequest request, HTTPResponse response) {
         response.setStatusLine("HTTP/1.1 404 Not Found");
         response.setHeader("Content-Type", "text/plain");
@@ -109,10 +116,10 @@ public abstract class HTTPServer {
         return true;
     }
 
-    public static boolean errorForbidden(HTTPRequest request, HTTPResponse response) {
-        response.setStatusLine("HTTP/1.1 403 Forbidden");
+    public static boolean errorInternalServerError(HTTPRequest request, HTTPResponse response) {
+        response.setStatusLine("HTTP/1.1 500 Internal Server Error");
         response.setHeader("Content-Type", "text/plain");
-        response.addMessage("Forbidden");
+        response.addMessage("Internal Server Error");
         return true;
     }
 
