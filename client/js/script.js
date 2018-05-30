@@ -21,22 +21,22 @@ function loadPeople() {
   $('#content').html(content);
 
   // Get list of people
-  apiPeople((_data) => {
+  api.people((response) => {
     // Clear peopleTiles
     peopleTiles.empty().hide();
 
     // Create tiles
-    for(var i = 0;i < _data.length; ++i) {
+    for(var i = 0;i < response.length; ++i) {
       // Set some people data
-      data.set('person' + _data[i].id, 'name', _data[i].name);
-      data.set('person' + _data[i].id, 'profilePicture', _data[i].profilePicture);
+      data.set('person' + response[i].id, 'name', response[i].name);
+      data.set('person' + response[i].id, 'profilePicture', response[i].profilePicture);
 
       // Set tile content
-      var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(_data[i].name));
-      ((tile) => loadProfilePicture(_data[i].id, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
+      var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(response[i].name));
+      ((tile) => loadProfilePicture(response[i].id, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
 
       // Click event
-      ((id) => tile.click(() => setContentPerson(id)))(_data[i].id);
+      ((id) => tile.click(() => setContentPerson(id)))(response[i].id);
 
       // Add to tiles
       peopleTiles.append(tile);
@@ -70,22 +70,22 @@ function loadAlbums() {
   $('#content').html(content);
 
   // Get list of albums
-  apiAlbums((_data) => {
+  api.albums((response) => {
     // Clear peopleTiles
     albumsTiles.empty().hide();
 
     // Create tiles
-    for(var i = 0;i < _data.length; ++i) {
+    for(var i = 0;i < response.length; ++i) {
       // Set some album data
-      data.set('album' + _data[i].id, 'title', _data[i].title);
-      data.set('album' + _data[i].id, 'coverPicture', null);
+      data.set('album' + response[i].id, 'title', response[i].title);
+      data.set('album' + response[i].id, 'coverPicture', null);
 
       // Set tile content
-      var tile = $('<div>').addClass('tile').append($('<span>').addClass('title').text(_data[i].title));
-      ((tile) => loadCoverPicture(_data[i].id, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
+      var tile = $('<div>').addClass('tile').append($('<span>').addClass('title').text(response[i].title));
+      ((tile) => loadCoverPicture(response[i].id, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
 
       // Click event
-      ((id) => tile.click(() => setContentAlbum(id)))(_data[i].id);
+      ((id) => tile.click(() => setContentAlbum(id)))(response[i].id);
 
       // Add to tiles
       albumsTiles.append(tile);
@@ -157,9 +157,9 @@ function loadProfilePicture(id, callback) {
   // Otherwise, load the picture
   else {
     (function (id, callback) {
-      apiProfilePicture(id, (_data) => {
-        data.set('person' + id, 'profilePicture', _data);
-        callback(_data);
+      api.profilePicture(id, (response) => {
+        data.set('person' + id, 'profilePicture', response);
+        callback(response);
       });
     })(id, callback);
   }
@@ -176,9 +176,9 @@ function loadCoverPicture(id, callback) {
 
   // Otherwise, load the picture
   (function (id, callback) {
-      apiCoverPicture(id, (_data) => {
-        data.set('album' + id, 'coverPicture', _data);
-        callback(_data);
+      api.coverPicture(id, (response) => {
+        data.set('album' + id, 'coverPicture', response);
+        callback(response);
       });
     })(id, callback);
 }

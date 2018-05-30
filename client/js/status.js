@@ -7,7 +7,7 @@ $(document).ready(() => {
 const status = {
 
   // Methods
-  checkHealth: () => apiHealth((healthy) => status.updateHealth(healthy)),
+  checkHealth: () => api.health((healthy) => status.updateHealth(healthy)),
 
   updateHealth: (healthy) => {
     if(healthy)

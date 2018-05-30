@@ -9,6 +9,7 @@ const feed = {
 	loadingBatch: false,
 	reachedEnd: false,
 	interval: null,
+	pictures: [],
 
 	// Methods
 	start: (filters) => {
@@ -20,6 +21,7 @@ const feed = {
 			// Stop when feed disappears
 			if($('.pictures-feed').length == 0) {
 					clearInterval(feed.interval);
+					feed.interval = null;
 					return;
 			}
 
@@ -30,10 +32,13 @@ const feed = {
 
 		// Initially, clear the feed, indicate we have not reached the end, are not loading a batch, and load the first batch
 		$('.pictures-feed').empty();
+		feed.pictures = [];
 		feed.reachedEnd = false;
 		feed.loadingBatch = false;
 		feed.loadBatch();
 	},
+
+	active: () => (feed.interval != null),
 
 	shouldUpdate: () => (!feed.reachedEnd && $('.pictures-feed-end').offset().top < $('body').height()),
 
@@ -47,7 +52,7 @@ const feed = {
 
 		// Load pictures
 		var start = $('.pictures-feed .picture').length;
-		apiSearch(feed.currentFilters, start, feed.PICTURES_PER_BATCH, (data) => {
+		api.search(feed.currentFilters, start, feed.PICTURES_PER_BATCH, (data) => {
 			// If no pictures were returned, we reached the end of the stream
 			if(data.pictures.length == 0) {
 				feed.reachedEnd = true;
@@ -59,10 +64,11 @@ const feed = {
 			for(var i = 0;i < data.pictures.length; ++i) {
 				// Set picture content
 				var picture = $('<div>').addClass('picture');
-				((picture) => apiPicture(data.pictures[i].id, 'small', (data) => {
+				((picture) => api.picture(data.pictures[i].id, 'small', (data) => {
 					picture.css({ backgroundImage: 'url(' + data + ')'});
 					picture.click(() => overlay.show($('.pictures-feed .picture').index(picture)));
 				}))(picture);
+				feed.pictures.push(data.pictures[i].id);
 				$('.pictures-feed').append(picture);
 			}
 

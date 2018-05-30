@@ -1,65 +1,58 @@
-// var apiUrl = 'https://www.robertvankammen.nl:9090';
-var apiUrl = 'http://' + window.location.hostname + ':4321';
+const api = {
+  // url = 'https://www.robertvankammen.nl:9090';
+  url: 'http://' + window.location.hostname + ':4321',
 
-function apiRequest(endpoint, callback) {
-  $.ajax({
-    url: apiUrl + endpoint,
-    headers: {
-      'Authorization': 'Basic cm9iZXJ0OnRlc3Q='
-    }
-  })
-  .done(callback)
-  .fail(apiError);
+  request: (endpoint, callback) => {
+    $.ajax({
+      url: api.url + endpoint,
+      // headers: {
+      //   'Authorization': 'Basic cm9iZXJ0OnRlc3Q='
+      // }
+    })
+    .done(callback)
+    .fail(api.error);
 
-  console.log('[API request] ' + apiUrl + endpoint);
-}
+    console.log('[API request] ' + api.url + endpoint);
+  },
 
-function apiRequestPicture(endpoint, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.onload = function() {
-    var reader = new FileReader();
-    reader.onloadend = function() {
-      callback(reader.result);
-    }
-    reader.readAsDataURL(xhr.response);
-  };
-  xhr.open('GET', apiUrl + endpoint);
-  xhr.setRequestHeader('Authorization', 'Basic cm9iZXJ0OnRlc3Q=');
-  xhr.responseType = 'blob';
-  xhr.send();
-}
+  requestPicture: (endpoint, callback) => {
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+      var reader = new FileReader();
+      reader.onloadend = function() {
+        callback(reader.result);
+      }
+      reader.readAsDataURL(xhr.response);
+    };
+    xhr.open('GET', api.url + endpoint);
+    // xhr.setRequestHeader('Authorization', 'Basic cm9iZXJ0OnRlc3Q=');
+    xhr.responseType = 'blob';
+    xhr.send();
+  },
 
-function apiError(data) {
-  setHealthStatus(false);
-}
+  error: (data) => setHealthStatus(false),
 
-function apiHealth(callback) {
-  apiRequest('/health', callback);
-}
+  health: (callback) => api.request('/health', callback),
 
-function apiPeople(callback) {
-  apiRequest('/people', callback);
-}
+  people: (callback) => api.request('/people', callback),
 
-function apiAlbums(callback) {
-  apiRequest('/albums', callback);
-}
+  albums: (callback) => api.request('/albums', callback),
+  
+  search: (filters, start, amount, callback) => {
+    var filterTerms = '';
+    for(var x in filters)
+      filterTerms += '&' + x + '=' + filters[x].join(';');
+    api.request('/search?start=' + start + '&amount=' + amount + filterTerms, callback);
+  },
 
-function apiSearch(filters, start, amount, callback) {
-  var filterTerms = '';
-  for(var x in filters)
-    filterTerms += '&' + x + '=' + filters[x].join(';');
-  apiRequest('/search?start=' + start + '&amount=' + amount + filterTerms, callback);
-}
+  picture: (id, size, callback) => api.requestPicture('/pictures/' + id + '?size=' + size, callback),
 
-function apiPicture(id, size, callback) {
-  apiRequestPicture('/pictures/' + id + '?size=' + size, callback);
-}
+  profilePicture: (id, callback) => api.requestPicture('/people/' + id + '/profilepicture', callback),
 
-function apiProfilePicture(id, callback) {
-  apiRequestPicture('/people/' + id + '/profilepicture', callback);
-}
+  coverPicture: (id, callback) => api.requestPicture('/albums/' + id + '/cover', callback),
 
-function apiCoverPicture(id, callback) {
-  apiRequestPicture('/albums/' + id + '/cover', callback);
-}
+  tag: (id, names, callback) => api.request('/pictures/' + id + '/tag?names=' + names.join(','), callback),
+  
+  untag: (id, names, callback) => api.request('/pictures/' + id + '/untag?names=' + names.join(','), callback),
+
+};

@@ -7,8 +7,10 @@ import nl.jessevogel.jfifmetadata.segments.APP1Segment;
 import nl.jessevogel.jfifmetadata.segments.Segment;
 import nl.jessevogel.photomanager.data.Person;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 public class Tagger {
@@ -23,7 +25,7 @@ public class Tagger {
             APP1Segment app1Segment = getApplicationSegment(image);
 
             // Parse JSON
-            JSONObject jsonObject = new JSONObject(new String(app1Segment.segmentData, "UTF-8"));
+            JSONObject jsonObject = getJSONFromApplicationSegment(app1Segment);
             JSONArray jsonPeopleArray;
             if (jsonObject.has("people")) {
                 jsonPeopleArray = jsonObject.getJSONArray("people");
@@ -47,7 +49,7 @@ public class Tagger {
             }
 
             // Update segment and break out of loop
-            app1Segment.segmentData = jsonObject.toString().getBytes();
+            storeJSONInApplicationSegment(app1Segment, jsonObject);
 
             // Update image
             JFIFWriter writer = new JFIFWriter();
@@ -67,7 +69,7 @@ public class Tagger {
             APP1Segment app1Segment = getApplicationSegment(image);
 
             // Parse JSON
-            JSONObject jsonObject = new JSONObject(new String(app1Segment.segmentData, "UTF-8"));
+            JSONObject jsonObject = getJSONFromApplicationSegment(app1Segment);
             if (!jsonObject.has("people"))
                 return true; // If it does not contains a 'people' field, then there is nothing to be done
             JSONArray jsonPeopleArray = jsonObject.getJSONArray("people");
@@ -89,7 +91,7 @@ public class Tagger {
             jsonObject.put("people", jsonPeopleArrayUpdated);
 
             // Update segment and break out of loop
-            app1Segment.segmentData = jsonObject.toString().getBytes();
+            storeJSONInApplicationSegment(app1Segment, jsonObject);
 
             // Update image
             JFIFWriter writer = new JFIFWriter();
@@ -116,6 +118,24 @@ public class Tagger {
         app1Segment.segmentHeader = APPLICATION_SEGMENT_HEADER;
         app1Segment.segmentData = new byte[0];
         return app1Segment;
+    }
+
+    private JSONObject getJSONFromApplicationSegment(APP1Segment app1Segment) {
+        JSONObject jsonObject;
+        try {
+            // Try to parse JSON object from segment data
+            jsonObject = new JSONObject(new String(app1Segment.segmentData, "UTF-8"));
+        }
+        catch(Exception e) {
+            // If it fails, create a new JSON object
+            jsonObject = new JSONObject();
+        }
+
+        return jsonObject;
+    }
+
+    private void storeJSONInApplicationSegment(APP1Segment app1Segment, JSONObject jsonObject) {
+        app1Segment.segmentData = jsonObject.toString().getBytes();
     }
 
 }
