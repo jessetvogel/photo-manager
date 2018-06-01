@@ -40,9 +40,7 @@ class Scanner {
 
         // Clear current data
         Data data = controller.getData();
-        data.getAlbums().clear();
-        data.getPeople().clear();
-        data.getPictures().clear();
+        data.clear();
 
         // Scan the root directory
         Log.println("Indexing pictures in " + directory.getAbsolutePath() + " ...");

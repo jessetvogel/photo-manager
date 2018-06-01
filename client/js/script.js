@@ -5,9 +5,9 @@ function loadPeople() {
   var peopleTiles = $('<div>').addClass('people-tiles').append($('<div>').addClass('loading'));
 
   // Search bar
-  peopleSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by name').keyup(() => {
+  peopleSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by name').on('input', function () {
     var searchTerm = $(this).val().toLowerCase();
-    $('.people-tiles .tile').each(() => {
+    $('.people-tiles .tile').each(function () {
       if(searchMatch($(this).find('.name').text(), searchTerm))
         $(this).show();
       else
@@ -54,9 +54,9 @@ function loadAlbums() {
   var albumsTiles = $('<div>').addClass('albums-tiles').append($('<div>').addClass('loading'));
 
   // Search bar
-  albumsSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by title').keyup(() => {
+  albumsSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by title').on('input', function () {
     var searchTerm = $(this).val().toLowerCase();
-    $('.albums-tiles .tile').each(() => {
+    $('.albums-tiles .tile').each(function () {
       if(searchMatch($(this).find('.title').text(), searchTerm))
         $(this).show();
       else

@@ -117,6 +117,7 @@ public class Tagger {
         APP1Segment app1Segment = new APP1Segment();
         app1Segment.segmentHeader = APPLICATION_SEGMENT_HEADER;
         app1Segment.segmentData = new byte[0];
+        image.addSegment(app1Segment);
         return app1Segment;
     }
 

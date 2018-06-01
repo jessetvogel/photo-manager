@@ -16,7 +16,7 @@ const overlay = {
       .appendTo($('body'));
 
     $('.tag-button').click(() => {
-      $('.tag-input').fadeToggle();
+      $('.tag-input').fadeToggle(200);
       $('.tag-input input').focus();
     });
 

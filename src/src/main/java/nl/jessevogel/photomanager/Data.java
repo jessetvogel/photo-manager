@@ -356,4 +356,16 @@ class Data {
         albums.add(album);
         return album;
     }
+
+    public void clear() {
+        // Clear lists
+        albums.clear();
+        people.clear();
+        pictures.clear();
+
+        // Reinitialize counters
+        currentAlbumId = 0;
+        currentPersonId = 0;
+        currentPictureId = 0;
+    }
 }
