@@ -302,17 +302,10 @@ span.text-end-of-feed {
 
 
 
-.tag {
-	position: fixed;
-	left: 0px;
-	bottom: 0px;
-	margin: 16px;
-	display: flex;
-	align-items: flex-end;
-	z-index: 3;
-}
-
 .tag-button {
+	position: fixed;
+	left: 16px;
+	bottom: 16px;
 	width: 48px;
 	height: 48px;
 	text-align: center;
@@ -321,16 +314,25 @@ span.text-end-of-feed {
 	color: var(--context-text-color);
 	background-color: white;
 	cursor: pointer;
+	z-index: 2;
 
-	/* TODO: necessary? */
+	/* necessary for span glyphicon? */
 	padding-left: 2px;
 	padding-top: 2px;
 }
 
-.tag-input {
-	display: none;
-	margin-left: 16px;
+.tag {
+	position: fixed;
+	left: 80px;
+	bottom: 16px;
 	width: 256px;
+	display: flex;
+	flex-direction: column;
+	z-index: 3;
+}
+
+.tag-input {
+	display: flex;
 }
 
 .tag-input input {
@@ -338,17 +340,19 @@ span.text-end-of-feed {
 	outline: none;
 	line-height: 24px;
 	padding: 8px;
-	margin-bottom: 4px;
 	width: 100%;
+	margin-bottom: 4px;
 	background-color: white;
 }
 
-.tag-input-options {
+.tag-options {
 	display: flex;
 	flex-direction: column-reverse;
+	width: 100%;
 }
 
-.tag-input-options .option {
+.tag-options .option {
+	width: 100%;
 	height: 40px;
 	line-height: 40px;
 	margin-bottom: 8px;
@@ -357,7 +361,29 @@ span.text-end-of-feed {
 	background-color: white;
 }
 
-.tag-input-options .option.selected {
+.tag-options .option.selected {
 	background-color: var(--selected-background-color);
 	color: var(--selected-text-color);
 }
+
+.tag-options .option.new::before {
+	content: '+ ';
+}
+
+.tag-options .option.new.selected {
+	background-color: var(--text-color-green);
+}
+
+.tagged-people {
+	position: fixed;
+	bottom: 16px;
+	right: 16px;
+	z-index: 3;
+}
+
+.tagged-people .person {
+	height: 40px;
+	line-height: 40px;
+	color: white;
+}
+
