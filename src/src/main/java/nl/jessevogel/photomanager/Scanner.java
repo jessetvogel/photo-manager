@@ -89,6 +89,7 @@ class Scanner {
         File[] files = directory.listFiles();
         if (files == null) return false;
         Album album = null;
+
         for (File file : files) {
             if (file.isDirectory()) {
                 // Scan every subdirectory
@@ -119,6 +120,7 @@ class Scanner {
                 if(isNew) {
                     Picture picture = controller.getData().createPicture(album.id, file.getName());
                     album.pictures.add(picture);
+                    pictures.add(picture);
                 }
             }
         }

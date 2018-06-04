@@ -298,16 +298,16 @@ span.text-end-of-feed {
 
 
 
-
-
-.tag, .tag-button {
-	display: none;
-}
-
-.tag-button {
+.overlay-buttons {
+	display: flex;
+	flex-direction: column;
 	position: fixed;
 	left: 16px;
 	bottom: 16px;
+	z-index: 2;
+}
+
+.tag-button, .download-button {
 	width: 48px;
 	height: 48px;
 	text-align: center;
@@ -316,11 +316,15 @@ span.text-end-of-feed {
 	color: var(--context-text-color);
 	background-color: white;
 	cursor: pointer;
-	z-index: 2;
+	margin-top: 16px;
 
 	/* necessary for span glyphicon? */
 	padding-left: 2px;
 	padding-top: 2px;
+}
+
+.tag, .tag-button {
+	display: none;
 }
 
 .tag {

@@ -12,7 +12,9 @@ const overlay = {
       .append($('<div>').addClass('overlay-background'))
       .append($('<div>').addClass('overlay-content'))
       .append($('<span>').addClass('glyphicon glyphicon-remove overlay-exit').click(overlay.close))
-      .append($('<div>').addClass('tag-button').append($('<span>').addClass('glyphicon glyphicon-tag')).click(() => { if(focus.current() == overlay) focus.open(tag); else if(focus.current() == tag) focus.close(); }))
+      .append($('<div>').addClass('overlay-buttons')
+        .append($('<div>').addClass('download-button').append($('<span>').addClass('glyphicon glyphicon-download-alt')).click(() => { window.open(api.url + '/pictures/' + feed.pictures[overlay.feedIndex].id, '_blank'); }))
+        .append($('<div>').addClass('tag-button').append($('<span>').addClass('glyphicon glyphicon-tag')).click(() => { if(focus.current() == overlay) focus.open(tag); else if(focus.current() == tag) focus.close(); })))
       .appendTo($('body'));
   },
 
