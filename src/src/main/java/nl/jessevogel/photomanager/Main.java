@@ -6,6 +6,9 @@ public class Main {
         // Create controller object
         Controller controller = new Controller();
 
+        // Set default root directory
+        controller.getData().setRootDirectory("/Users/jessetvogel/Desktop/test");
+
         // Load data
         if(!controller.getData().loadData())
             Log.error("Failed to load data!");

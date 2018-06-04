@@ -30,7 +30,7 @@ class Data {
 
     Data() {
         // Default root directory TODO: change this
-        rootDirectory = "/Users/jessetvogel/Desktop/test";
+        rootDirectory = "";
 
         // Initialize id counters
         currentPictureId = 0;
