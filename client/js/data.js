@@ -13,6 +13,17 @@ const data = {
 	set: (id, key, value) => {
 		if(data.data[id] == undefined) data.data[id] = {};
   		data.data[id][key] = value;
+	},
+
+
+	getPersonIdByName: (name) => {
+		for(var key in data.data) {
+			if(key.startsWith('person')) {
+				if(data.data[key].name == name)
+					return key.substring(6);
+			}
+		}
+		return null;
 	}
 
 };

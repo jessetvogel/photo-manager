@@ -368,4 +368,16 @@ class Data {
         currentPersonId = 0;
         currentPictureId = 0;
     }
+
+    public String getTagged(Picture picture) {
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for(Person person : people) {
+            if(person.pictures.contains(picture)) {
+                if(first) first = false; else sb.append(',');
+                sb.append("" + person.id);
+            }
+        }
+        return sb.toString();
+    }
 }

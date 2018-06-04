@@ -29,8 +29,8 @@ class Scanner {
     boolean scan() {
 
         /*
-         * Step 1. Index all pictures
-         * Step 2. Retreiving metadata
+         * Step 1. Search through directories for (new) pictures
+         * Step 2. Retrieving metadata
          * Step 3. Create smaller versions / thumbnails
          */
 
@@ -38,22 +38,20 @@ class Scanner {
         File directory = new File(controller.getData().getRootDirectory());
         if (!directory.exists() || !directory.isDirectory()) return false;
 
-        // Clear current data
-        Data data = controller.getData();
-        data.clear();
-
         // Scan the root directory
         Log.println("Indexing pictures in " + directory.getAbsolutePath() + " ...");
-        boolean success = indexDirectory(directory);
+        ArrayList<Picture> pictures = new ArrayList<>();
+        boolean success = indexDirectory(directory, pictures);
         if(!success) {
             Log.println("Something went wrong while indexing pictures.");
             return false;
         }
 
-        ArrayList<Picture> pictures = controller.getData().getPictures();
         int N = pictures.size();
-        Log.println("Found " + N + " pictures!");
+        Log.println("Found " + N + " new picture(s)");
+        if(N == 0) return true;
 
+        // In case new pictures are found, do steps 2 and 3
         Log.print("Retrieving metadata...   0%");
         int index = 0;
         for (Picture picture : pictures) {
@@ -63,22 +61,20 @@ class Scanner {
         }
         Log.println("");
 
-//        Log.print("Creating thumbnails...   0%");
-//        index = 0;
-//        (new File(controller.getData().getThumbsFolder())).mkdir();
-//        for (Picture picture : pictures) {
-//            success = success & resizePicture(picture);
-//            index++;
-//            if (index * 100 / N > (index - 1) * 100 / N) Log.updatePercentage(index * 100 / N);
-//        }
-//        Log.println("");
-
-        Log.println("Scanning complete!");
+        Log.print("Creating thumbnails...   0%");
+        index = 0;
+        (new File(controller.getData().getThumbsFolder())).mkdir();
+        for (Picture picture : pictures) {
+            success = success & resizePicture(picture);
+            index++;
+            if (index * 100 / N > (index - 1) * 100 / N) Log.updatePercentage(index * 100 / N);
+        }
+        Log.println("");
 
         return success;
     }
 
-    private boolean indexDirectory(File directory) {
+    private boolean indexDirectory(File directory, ArrayList<Picture> pictures) {
         // Don't scan the data folder or hidden folders
         if (directory.getAbsolutePath().equals(controller.getData().getDataFolder())) return true;
         if (directory.getName().startsWith(".")) return true;
@@ -96,7 +92,7 @@ class Scanner {
         for (File file : files) {
             if (file.isDirectory()) {
                 // Scan every subdirectory
-                if (!indexDirectory(file)) {
+                if (!indexDirectory(file, pictures)) {
                     Log.error("Failed to scan directory " + file.getAbsolutePath());
                     return false;
                 }
@@ -110,9 +106,20 @@ class Scanner {
                     if (album == null) album = controller.getData().createAlbum(file.getParentFile().getName(), directoryPath);
                 }
 
-                // Create a new picture object
-                Picture picture = controller.getData().createPicture(album.id, file.getName());
-                album.pictures.add(picture);
+                // Check if this picture is already scanned ...
+                boolean isNew = true;
+                for(Picture p : album.pictures) {
+                    if(p.filename.equals(file.getName())) {
+                        isNew = false;
+                        break;
+                    }
+                }
+
+                // ... if not, create a new picture object
+                if(isNew) {
+                    Picture picture = controller.getData().createPicture(album.id, file.getName());
+                    album.pictures.add(picture);
+                }
             }
         }
 
@@ -200,5 +207,4 @@ class Scanner {
         Thumbnailator pictureResizer = new Thumbnailator();
         return pictureResizer.resizeSmall(file.getAbsolutePath(), controller.getData().getThumbPath(picture));
     }
-
 }

@@ -45,9 +45,16 @@ class Commands {
         if (parts[0].equals("set")) return commandSet(parts);
         if (parts[0].equals("get")) return commandGet(parts);
         if (parts[0].equals("scan")) return commandScan();
+        if (parts[0].equals("wipe")) return commandWipe();
 
         // If no command found, return false
         return false;
+    }
+
+    private boolean commandWipe() {
+        controller.getData().clear();
+        // TODO: clear /.data directory (?)
+        return true;
     }
 
     private boolean commandScan() {

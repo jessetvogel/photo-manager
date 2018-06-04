@@ -272,7 +272,8 @@ class APIServer extends HTTPServer {
             else response.addMessage(",");
             Picture picture = arrayPictures.get(i);
             response.addMessage("{"
-                    + "\"id\":" + picture.id
+                    + "\"id\":" + picture.id + ","
+                    + "\"tagged\":[" + controller.getData().getTagged(picture) + "]"
                     + "}");
         }
 

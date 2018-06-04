@@ -300,7 +300,9 @@ span.text-end-of-feed {
 
 
 
-
+.tag, .tag-button {
+	display: none;
+}
 
 .tag-button {
 	position: fixed;
@@ -382,8 +384,27 @@ span.text-end-of-feed {
 }
 
 .tagged-people .person {
-	height: 40px;
-	line-height: 40px;
-	color: white;
+	display: flex;
+	justify-content: space-between;
+	width: 256px;
+    height: 40px;
+    line-height: 40px;
+    padding-left: 8px;
+    padding-right: 8px;
+    color: var(--content-text-color);
+    background-color: white;
+    margin-top: 8px;
+    transition: 0.5s;
+    opacity: 0.5;
+}
+
+.tagged-people .person:hover {
+	opacity: 1.0;
+}
+
+.tagged-people .person span.glyphicon {
+	font-size: 14px;
+	line-height: 34px;
+	cursor: pointer;
 }
 

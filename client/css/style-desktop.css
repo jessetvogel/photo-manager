@@ -84,8 +84,9 @@
   max-height: 95%;
 }
 
-
-
+.tag, .tag-button {
+  display: initial;
+}
 
 
 

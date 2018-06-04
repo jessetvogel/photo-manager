@@ -1,5 +1,8 @@
 const tag = {
 
+  // Variables
+  options: [],
+
 	// Methods
 	open: () => {
 		if($('.tag').length > 0) return;
@@ -27,8 +30,7 @@ const tag = {
       if(key == 13) {
         var selected = $('.tag-options .option.selected');
         if(selected.length == 0) return;
-        var name = selected.text();
-        api.tag(feed.pictures[overlay.feedIndex], [name]);
+        tag.tag(selected.text());
         $('.tag-input input').val('');
         $('.tag-options').empty();
         return;
@@ -50,6 +52,8 @@ const tag = {
 	  	}
 	  })
   	.focus();
+
+    tag.refreshTaggedPeople();
 	},
 
 	close: () => {
@@ -61,22 +65,49 @@ const tag = {
     var searchTerm = $('.tag-input input').val();
     if(searchTerm.length == 0) return;
     var count = 0;
-    for(var key in data.data) {
-      if(key.startsWith('person')) {
-        var name = data.get(key, 'name');
-        if(searchMatch(name, searchTerm)) {
-          var option = $('<div>').addClass('option').text(name).click(function () {
-            $('.selected').removeClass('selected');
-            $(this).addClass('selected');
-          }).dblclick(function () {
-            console.log('Double clicked ' + name);
-          });
-          $('.tag-options').append(option);
-          if((++count) >= 3) break;
-        }
+    for(var i = 0;i < tag.options.length; ++i) {
+      if(feed.pictures[overlay.feedIndex].tagged.includes(tag.options[i])) continue;
+      if(searchMatch(tag.options[i], searchTerm)) {
+        var option = $('<div>').addClass('option').text(tag.options[i]).click(function () {
+          $('.selected').removeClass('selected');
+          $(this).addClass('selected');
+        }).dblclick(function () {
+          console.log('Double clicked ' + tag.options[i]);
+        });
+        $('.tag-options').append(option);
+        if((++count) >= 3) break;
       }
     }
     $('.tag-options .option').first().addClass('selected');
-	}
+	},
+
+  refreshTaggedPeople: () => {
+    var tagged = feed.pictures[overlay.feedIndex].tagged;
+    var taggedPeople = $('.tagged-people');
+    taggedPeople.empty();
+    for(var i = 0;i < tagged.length; ++i) {
+      ((i) => taggedPeople.append($('<div>').addClass('person').append($('<span>').text(tagged[i])).append($('<span>').addClass('glyphicon glyphicon-remove').click(() => tag.untag(tagged[i])))))(i);
+    }
+  },
+
+  tag: (name) => {
+    var currentPicture = feed.pictures[overlay.feedIndex];
+    api.tag(currentPicture.id, [ name ]);
+    currentPicture.tagged.push(name);
+    tag.refreshTaggedPeople();
+    tag.addOption(name);
+  },
+
+  untag: (name) => {
+    var currentPicture = feed.pictures[overlay.feedIndex];
+    api.untag(currentPicture.id, [ name ]);
+    currentPicture.tagged = currentPicture.tagged.filter(e => e !== name);
+    tag.refreshTaggedPeople();
+  },
+
+  addOption: (name) => {
+    if(!tag.options.includes(name))
+      tag.options.push(name);
+  }
 
 };

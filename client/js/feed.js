@@ -52,23 +52,26 @@ const feed = {
 
 		// Load pictures
 		var start = $('.pictures-feed .picture').length;
-		api.search(feed.currentFilters, start, feed.PICTURES_PER_BATCH, (data) => {
+		api.search(feed.currentFilters, start, feed.PICTURES_PER_BATCH, (response) => {
 			// If no pictures were returned, we reached the end of the stream
-			if(data.pictures.length == 0) {
+			if(response.pictures.length == 0) {
 				feed.reachedEnd = true;
 				$('.pictures-feed-end').html($('<span>').addClass('text-end-of-feed').text('~'));
 				return;
 			}
 
 			// Add pictures to feed
-			for(var i = 0;i < data.pictures.length; ++i) {
+			for(var i = 0;i < response.pictures.length; ++i) {
 				// Set picture content
 				var picture = $('<div>').addClass('picture');
-				((picture) => api.picture(data.pictures[i].id, 'small', (data) => {
+				((picture) => api.picture(response.pictures[i].id, 'small', (data) => {
 					picture.css({ backgroundImage: 'url(' + data + ')'});
 					picture.click(() => overlay.show($('.pictures-feed .picture').index(picture)));
 				}))(picture);
-				feed.pictures.push(data.pictures[i].id);
+				feed.pictures.push({
+					id: response.pictures[i].id,
+					tagged: response.pictures[i].tagged.map(personId => data.get('person' + personId, 'name'))
+				});
 				$('.pictures-feed').append(picture);
 			}
 

@@ -1,3 +1,8 @@
+$(document).ready(() => {
+  $('#button-people').click(loadPeople);
+  $('#button-albums').click(loadAlbums);
+});
+
 function loadPeople() {
   // Construct content
   var content = $('<div>').addClass('content-people');
@@ -30,6 +35,9 @@ function loadPeople() {
       // Set some people data
       data.set('person' + response[i].id, 'name', response[i].name);
       data.set('person' + response[i].id, 'profilePicture', response[i].profilePicture);
+
+      // Add to tag options
+      tag.addOption(response[i].name);
 
       // Set tile content
       var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(response[i].name));
