@@ -1,6 +1,8 @@
 $(document).ready(() => {
-  $('#button-people').click(loadPeople);
+  // Set click event listeners
   $('#button-albums').click(loadAlbums);
+  $('#button-people').click(loadPeople);
+  $('#button-settings').click(loadSettings);
 });
 
 function loadPeople() {
@@ -25,26 +27,22 @@ function loadPeople() {
   content.append(peopleTiles);
   $('#content').html(content);
 
-  // Get list of people
-  api.people((response) => {
+  data.updatePeople(() => {
     // Clear peopleTiles
     peopleTiles.empty().hide();
 
-    // Create tiles
-    for(var i = 0;i < response.length; ++i) {
-      // Set some people data
-      data.set('person' + response[i].id, 'name', response[i].name);
-      data.set('person' + response[i].id, 'profilePicture', response[i].profilePicture);
-
-      // Add to tag options
-      tag.addOption(response[i].name);
+    // Create a tile for each person
+    for(var key in data.data) {
+      if(!key.startsWith('person')) continue;
+      var person = data.data[key];
+      var personId = key.substring(6); // TODO
 
       // Set tile content
-      var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(response[i].name));
-      ((tile) => loadProfilePicture(response[i].id, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
+      var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(person.name));
+      ((tile) => loadProfilePicture(personId, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
 
       // Click event
-      ((id) => tile.click(() => setContentPerson(id)))(response[i].id);
+      ((personId) => tile.click(() => setContentPerson(personId)))(personId);
 
       // Add to tiles
       peopleTiles.append(tile);
@@ -78,22 +76,22 @@ function loadAlbums() {
   $('#content').html(content);
 
   // Get list of albums
-  api.albums((response) => {
-    // Clear peopleTiles
+  data.updateAlbums(() => {
+    // Clear albumsTiles
     albumsTiles.empty().hide();
 
-    // Create tiles
-    for(var i = 0;i < response.length; ++i) {
-      // Set some album data
-      data.set('album' + response[i].id, 'title', response[i].title);
-      data.set('album' + response[i].id, 'coverPicture', null);
+    // Create a tile for each album
+    for(var key in data.data) {
+      if(!key.startsWith('album')) continue;
+      var album = data.data[key];
+      var albumId = key.substring(5); // TODO
 
       // Set tile content
-      var tile = $('<div>').addClass('tile').append($('<span>').addClass('title').text(response[i].title));
-      ((tile) => loadCoverPicture(response[i].id, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
+      var tile = $('<div>').addClass('tile').append($('<span>').addClass('title').text(album.title));
+      ((tile) => loadCoverPicture(albumId, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
 
       // Click event
-      ((id) => tile.click(() => setContentAlbum(id)))(response[i].id);
+      ((albumId) => tile.click(() => setContentAlbum(albumId)))(albumId);
 
       // Add to tiles
       albumsTiles.append(tile);
@@ -191,17 +189,6 @@ function loadCoverPicture(id, callback) {
     })(id, callback);
 }
 
-// * UTIL *
-function searchMatch(string, searchTerm) {
-  return simplifyString(string).includes(simplifyString(searchTerm));
-}
-
-function simplifyString(str) {
-  return str.toLowerCase()
-            .replace(/[áàâä]/g, 'a')
-            .replace(/[úùûü]/g, 'u')
-            .replace(/[éèêë]/g, 'e')
-            .replace(/[íìîï]/g, 'i')
-            .replace(/[óòôö]/g, 'o')
-            .replace(/[^A-Za-z0-9\-_]/g, '-');
+function loadSettings() {
+  $('#content').empty().append("Settings TODO");
 }

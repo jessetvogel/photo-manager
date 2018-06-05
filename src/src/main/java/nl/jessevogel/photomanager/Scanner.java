@@ -143,29 +143,6 @@ class Scanner {
             return false;
         }
 
-//        try {
-//            // Look for people in metadata
-//            Metadata metadata = ImageMetadataReader.readMetadata(file);
-//            for (XmpDirectory xmpDirectory : metadata.getDirectoriesOfType(XmpDirectory.class)) {
-//                for (Map.Entry<String, String> entry : xmpDirectory.getXmpProperties().entrySet()) {
-//                    if (!entry.getKey().endsWith("mwg-rs:Name")) continue;
-//
-//                    // Find corresponding person (create one if does not exist)
-//                    String name = entry.getValue();
-//                    Person person = controller.getData().getPersonByName(name);
-//                    if (person == null) {
-//                        person = new Person();
-//                        person.id = currentPersonId ++;
-//                        person.name = name;
-//                        controller.getData().getPeople().add(person);
-//                    }
-//                    person.pictures.add(picture);
-//                }
-//            }
-//        } catch (IOException | ImageProcessingException e) {
-//            e.printStackTrace();
-//        }
-
         try {
             // Read image for metadata
             JFIFReader reader = new JFIFReader();
