@@ -30,7 +30,7 @@ const api = {
     xhr.send();
   },
 
-  error: (data) => setHealthStatus(false),
+  error: (data) => status.updateHealth(false),
 
   health: (callback) => api.request('/health', callback),
 

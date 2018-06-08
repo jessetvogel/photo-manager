@@ -41,7 +41,7 @@ const data = {
 				// Add to tag options
 				tag.addOption(response[i].name);
 			}
-			callback();
+			if(callback != undefined) callback();
 		});
 	},
 
@@ -53,7 +53,7 @@ const data = {
 				data.set('album' + response[i].id, 'title', response[i].title);
 				data.set('album' + response[i].id, 'coverPicture', null);
 			}
-			callback();
+			if(callback != undefined) callback();
 		});
 	}
 

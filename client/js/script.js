@@ -3,6 +3,10 @@ $(document).ready(() => {
   $('#button-albums').click(loadAlbums);
   $('#button-people').click(loadPeople);
   $('#button-settings').click(loadSettings);
+
+  // Load people and albums already once
+  data.updatePeople();
+  data.updateAlbums();
 });
 
 function loadPeople() {

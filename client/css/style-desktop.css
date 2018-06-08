@@ -17,6 +17,7 @@
 
 #menu .button {
   flex-grow: 0;
+  transition-property: background-color;
   transition: 0.4s;
 }
 
@@ -79,9 +80,9 @@
   animation: scalein 0.2s forwards;
 }
 
-.overlay .picture {
-  max-width: 80%;
-  max-height: 95%;
+.overlay-content {
+  max-width: 90%;
+  max-height: 90%;
 }
 
 .tag, .tag-button {
