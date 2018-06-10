@@ -29,13 +29,18 @@ class Data {
     private int currentPersonId;
 
     Data() {
-        // Default root directory TODO: change this
-        rootDirectory = "";
+        // Default root directory
+        rootDirectory = null;
 
         // Initialize id counters
         currentPictureId = 0;
         currentAlbumId = 0;
         currentPersonId = 0;
+
+        // Create empty array lists TODO: this is only to prevent NullPointerException's in case nothing is loaded
+        pictures = new ArrayList<>();
+        albums = new ArrayList<>();
+        people = new ArrayList<>();
     }
 
     boolean setRootDirectory(String directory) {
@@ -51,12 +56,15 @@ class Data {
     }
 
     boolean loadData() {
+        if(rootDirectory == null) return false;
+        clear();
         return loadPicturesData() &&
                 loadAlbumData() &&
                 loadPeopleData();
     }
 
     boolean storeData() {
+        if(rootDirectory == null) return false;
         return storePicturesData() &&
                 storeAlbumData() &&
                 storePeopleData();

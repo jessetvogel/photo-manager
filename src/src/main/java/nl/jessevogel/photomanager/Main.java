@@ -6,16 +6,12 @@ public class Main {
         // Create controller object
         Controller controller = new Controller();
 
-        // Set default root directory
-        controller.getData().setRootDirectory("/Users/jessetvogel/Desktop/test");
-
-        // Load data
-        if(!controller.getData().loadData())
-            Log.error("Failed to load data!");
-
         // Start API & Web server
         controller.getAPIServer().start();
         controller.getWebServer().start();
+
+        // Read settings file
+        controller.getCommands().executeFile(".preferences");
 
         // Read commands
         controller.getCommands().read();
@@ -24,7 +20,7 @@ public class Main {
         controller.getAPIServer().stop();
         controller.getWebServer().stop();
 
-        // Store data TODO: this should not be here
+        // Store data TODO: this should not be here ?
         controller.getData().storeData();
     }
 

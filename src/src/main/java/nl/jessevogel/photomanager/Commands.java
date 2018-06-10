@@ -4,9 +4,12 @@ import nl.jessevogel.photomanager.data.Album;
 import nl.jessevogel.photomanager.data.Person;
 import nl.jessevogel.photomanager.data.Picture;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 class Commands {
 
@@ -37,18 +40,65 @@ class Commands {
     }
 
     private boolean parse(String command) {
-        if (command.matches("\\s*")) return true;
+        if (command.matches("\\s*(#.*)?")) return true;
         String[] parts = command.split("\\s+");
 
         if (parts[0].equals("help")) return commandHelp();
         if (parts[0].equals("data")) return commandData(parts);
+        if (parts[0].equals("loaddata")) return commandLoadData();
+        if (parts[0].equals("storedata")) return commandStoreData();
         if (parts[0].equals("set")) return commandSet(parts);
         if (parts[0].equals("get")) return commandGet(parts);
         if (parts[0].equals("scan")) return commandScan();
         if (parts[0].equals("wipe")) return commandWipe();
+        if (parts[0].equals("client")) return commandClient();
 
         // If no command found, return false
         return false;
+    }
+
+    private boolean commandStoreData() {
+        if(!controller.getData().storeData())
+            System.out.println("Failed to store data!");
+        return true;
+    }
+
+    private boolean commandLoadData() {
+        if(!controller.getData().loadData())
+            System.out.println("Failed to load data!");
+        return true;
+    }
+
+    private boolean commandClient() {
+        try {
+            String url = "http://localhost:" + controller.getWebServer().getPort();
+            String os = System.getProperty("os.name").toLowerCase();
+
+            if(os.contains("win")) {
+                Runtime runtime = Runtime.getRuntime();
+                runtime.exec("start " + url);
+                return true;
+            }
+
+            if(os.contains("mac")) {
+                Runtime runtime = Runtime.getRuntime();
+                runtime.exec("open " + url);
+                return true;
+            }
+
+//            // TODO: implement for Linux/Unix
+//            if(os.contains("nix") || os.contains("nux")) {
+//                Runtime runtime = Runtime.getRuntime();
+//                runtime.exec( ??? );
+//                return true;
+//            }
+
+            System.out.println("Command 'client' is only implemented for Windows and macOS.");
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private boolean commandWipe() {
@@ -170,4 +220,17 @@ class Commands {
         return false;
     }
 
+    void executeFile(String path) {
+        DataFile dataFile = new DataFile(path);
+        if(!dataFile.exists()) {
+            System.out.println("Could not find file " + path);
+            return;
+        }
+        String line;
+        while((line = dataFile.readLine()) != null) {
+            if(!parse(line))
+                System.out.println("Unable to parse command '" + line + "'");
+        }
+        dataFile.close();
+    }
 }

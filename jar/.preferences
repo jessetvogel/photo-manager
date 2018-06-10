@@ -1,0 +1,8 @@
+# Set root directory
+set root_directory /Users/jessetvogel/Desktop/test
+loaddata
+scan
+
+# Start client
+client
+

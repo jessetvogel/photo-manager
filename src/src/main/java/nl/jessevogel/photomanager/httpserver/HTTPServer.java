@@ -48,6 +48,10 @@ public abstract class HTTPServer {
 
     public abstract boolean respond(HTTPRequest request, HTTPResponse response);
 
+    public int getPort() {
+        return port;
+    }
+
     private class HTTPServerThread extends Thread {
         public void run() {
             try {

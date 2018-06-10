@@ -27,6 +27,11 @@ class DataFile {
         catch(IOException e) { e.printStackTrace(); }
     }
 
+    boolean exists() {
+        File file = new File(path);
+        return file.exists() && !file.isDirectory();
+    }
+
     String readLine() {
         // If not reading nor closed, can't read
         if(type != Type.Reading && type != Type.Closed) return null;
