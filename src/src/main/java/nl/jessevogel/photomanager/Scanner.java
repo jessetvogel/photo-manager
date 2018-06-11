@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 class Scanner {
 
@@ -29,29 +30,60 @@ class Scanner {
     boolean scan() {
 
         /*
-         * Step 1. Search through directories for (new) pictures
-         * Step 2. Retrieving metadata
-         * Step 3. Create smaller versions / thumbnails
+         * Step 1. Check if pictures are deleted
+         * Step 2. Search through directories for (new) pictures
+         * Step 3. Retrieving metadata
+         * Step 4. Create smaller versions / thumbnails
          */
 
         // Make sure the current root directory is a directory
-        File directory = new File(controller.getData().getRootDirectory());
+        String rootDirectory = controller.getData().getRootDirectory();
+        if (rootDirectory == null) return false;
+        File directory = new File(rootDirectory);
         if (!directory.exists() || !directory.isDirectory()) return false;
 
-        // Scan the root directory
-        Log.println("Indexing pictures in " + directory.getAbsolutePath() + " ...");
+        // Check if pictures are deleted
+        Log.println("Scan for deleted pictures");
+        HashSet<Picture> removedPictures = new HashSet<>();
+        for (Picture picture : controller.getData().getPictures()) {
+            String picturePath = controller.getData().getPicturePath(picture);
+            if(picturePath == null || !(new File(picturePath)).exists())
+                removedPictures.add(picture);
+        }
+        controller.getData().getPictures().removeAll(removedPictures);
+
+        // If pictures were deleted, remove them from people and albums
+        int N = removedPictures.size();
+        Log.println("" + N + " picture(s) were deleted");
+        if(N > 0) {
+            HashSet<Person> removedPeople = new HashSet<>();
+            HashSet<Album> removedAlbums = new HashSet<>();
+            for(Person person : controller.getData().getPeople()) {
+                person.pictures.removeAll(removedPictures);
+                if(person.pictures.size() == 0) removedPeople.add(person);
+            }
+            for(Album album : controller.getData().getAlbums()) {
+                album.pictures.removeAll(removedPictures);
+                if(album.pictures.size() == 0) removedAlbums.add(album);
+            }
+            controller.getData().getPeople().removeAll(removedPeople);
+            controller.getData().getAlbums().removeAll(removedAlbums);
+        }
+
+        // Scan the root directory for new pictures
+        Log.println("Scan for new pictures in " + directory.getAbsolutePath());
         ArrayList<Picture> pictures = new ArrayList<>();
         boolean success = indexDirectory(directory, pictures);
-        if(!success) {
-            Log.println("Something went wrong while indexing pictures.");
+        if (!success) {
+            Log.println("Something went wrong while scanning for new pictures.");
             return false;
         }
 
-        int N = pictures.size();
+        N = pictures.size();
         Log.println("Found " + N + " new picture(s)");
-        if(N == 0) return true;
+        if (N == 0) return true;
 
-        // In case new pictures are found, do steps 2 and 3
+        // In case new pictures are found, do get metadata and make thumbnails
         Log.print("Retrieving metadata...   0%");
         int index = 0;
         for (Picture picture : pictures) {
@@ -104,20 +136,21 @@ class Scanner {
                 // If this directory does not have an associated album, create one
                 if (album == null) {
                     album = controller.getData().getAlbumByPath(directoryPath);
-                    if (album == null) album = controller.getData().createAlbum(file.getParentFile().getName(), directoryPath);
+                    if (album == null)
+                        album = controller.getData().createAlbum(file.getParentFile().getName(), directoryPath);
                 }
 
                 // Check if this picture is already scanned ...
                 boolean isNew = true;
-                for(Picture p : album.pictures) {
-                    if(p.filename.equals(file.getName())) {
+                for (Picture p : album.pictures) {
+                    if (p.filename.equals(file.getName())) {
                         isNew = false;
                         break;
                     }
                 }
 
                 // ... if not, create a new picture object
-                if(isNew) {
+                if (isNew) {
                     Picture picture = controller.getData().createPicture(album.id, file.getName());
                     album.pictures.add(picture);
                     pictures.add(picture);
@@ -149,18 +182,18 @@ class Scanner {
             JFIFImage image = reader.readMetaData(file.getAbsolutePath());
 
             // Look for custom data tag
-            for(Segment segment : image.getSegments()) {
+            for (Segment segment : image.getSegments()) {
                 // Only consider 0xE1 segments
-                if(segment.getMarkerCode() != 0xE1) continue;
+                if (segment.getMarkerCode() != 0xE1) continue;
                 APP1Segment app1Segment = (APP1Segment) segment;
-                if(!app1Segment.segmentHeader.equals("photomanager")) continue;
+                if (!app1Segment.segmentHeader.equals("photomanager")) continue;
 
                 // Look for people tagged in image
                 JSONObject jsonObject = new JSONObject(new String(app1Segment.segmentData, "UTF-8"));
-                if(!jsonObject.has("people")) continue;
+                if (!jsonObject.has("people")) continue;
                 JSONArray peopleArray = jsonObject.getJSONArray("people");
                 int length = peopleArray.length();
-                for(int i = 0;i < length; ++i) {
+                for (int i = 0; i < length; ++i) {
                     String name = peopleArray.getString(i);
                     Person person = controller.getData().getPersonByName(name);
                     if (person == null) person = controller.getData().createPerson(name);

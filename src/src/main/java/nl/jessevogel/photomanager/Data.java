@@ -308,7 +308,9 @@ class Data {
     }
 
     String getPicturePath(Picture picture) {
-        return rootDirectory + SEPARATOR + getAlbumById(picture.albumId).path + SEPARATOR + picture.filename;
+        Album album = getAlbumById(picture.albumId);
+        if(album == null) return null;
+        return rootDirectory + SEPARATOR + album.path + SEPARATOR + picture.filename;
     }
 
     String getDataFolder() {

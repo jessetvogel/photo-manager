@@ -4,12 +4,10 @@ import nl.jessevogel.photomanager.data.Album;
 import nl.jessevogel.photomanager.data.Person;
 import nl.jessevogel.photomanager.data.Picture;
 
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 class Commands {
 
@@ -113,6 +111,9 @@ class Commands {
             if(!controller.getData().storeData())
                 Log.error("Failed to store data!");
         }
+        else {
+            System.out.println("Failed to scan!");
+        }
         return true;
     }
 
@@ -134,61 +135,46 @@ class Commands {
         if (parts.length < 2) return false;
 
         if (parts[1].equals("albums")) {
-            for (Album album : controller.getData().getAlbums())
-                System.out.println("[ALBUM] " + album.title + ", id = " + album.id + ", path = " + album.path);
+            Table table = new Table(4);
+            table.add("id");
+            table.add("title");
+            table.add("path");
+            table.add("amount of pictures");
+            for (Album album : controller.getData().getAlbums()) {
+                table.add("" + album.id);
+                table.add(album.title);
+                table.add(album.path);
+                table.add("" + album.pictures.size());
+            }
+            table.print();
             return true;
         }
 
         if (parts[1].equals("people")) {
-            for (Person person : controller.getData().getPeople())
-                System.out.println("[PERSON] " + person.name + ", id = " + person.id);
+            Table table = new Table(3);
+            table.add("id");
+            table.add("name");
+            table.add("amount of pictures");
+            for (Person person : controller.getData().getPeople()) {
+                table.add("" + person.id);
+                table.add(person.name);
+                table.add("" + person.pictures.size());
+            }
+            table.print();
             return true;
         }
 
         if (parts[1].equals("pictures")) {
-            for (Picture picture : controller.getData().getPictures())
-                System.out.println("[PICTURE] " + picture.filename + ", id = " + picture.id + ", albumId = " + picture.albumId);
-            return true;
-        }
-
-        if (parts.length < 3) return false;
-
-        if (parts[1].equals("person")) {
-            Person person = controller.getData().getPersonById(Integer.parseInt(parts[2])); // TODO : check if number..
-            if (person == null) {
-                System.out.println("No person exists with id " + parts[2]);
-                return true;
+            Table table = new Table(3);
+            table.add("id");
+            table.add("filename");
+            table.add("album id");
+            for (Picture picture : controller.getData().getPictures()) {
+                table.add("" + picture.id);
+                table.add(picture.filename);
+                table.add("" + picture.albumId);
             }
-
-            System.out.println("id: " + person.id);
-            System.out.println("name: " + person.name);
-            System.out.println("amount of pictures: " + person.pictures.size());
-            return true;
-        }
-
-        if (parts[1].equals("album")) {
-            Album album = controller.getData().getAlbumById(Integer.parseInt(parts[2])); // TODO : check if number..
-            if (album == null) {
-                System.out.println("No album exists with id " + parts[2]);
-                return true;
-            }
-
-            System.out.println("id: " + album.id);
-            System.out.println("title: " + album.title);
-            System.out.println("amount of pictures: " + album.pictures.size());
-            return true;
-        }
-
-        if (parts[1].equals("picture")) {
-            Picture picture = controller.getData().getPictureById(Integer.parseInt(parts[2])); // TODO : check if number..
-            if (picture == null) {
-                System.out.println("No picture exists with id " + parts[2]);
-                return true;
-            }
-
-            System.out.println("id: " + picture.id);
-            System.out.println("filename: " + picture.filename);
-            System.out.println("album: " + controller.getData().getAlbumById(picture.albumId).title);
+            table.print();
             return true;
         }
 
@@ -233,4 +219,36 @@ class Commands {
         }
         dataFile.close();
     }
+
+    private class Table {
+
+        private int[] maxWidth;
+        private int columns;
+        private ArrayList<String> entries;
+
+        Table(int columns) {
+            this.columns = columns;
+            entries = new ArrayList<>();
+            maxWidth = new int[columns];
+        }
+
+        void add(String entry) {
+            int i = entries.size();
+            maxWidth[i % columns] = Math.max(maxWidth[i % columns], entry.length());
+            entries.add(entry);
+        }
+
+        void print() {
+            int N = entries.size();
+            for(int i = 0;i < N; ++i) {
+                String entry = entries.get(i);
+                System.out.print(entry);
+                System.out.print(new String(new char[maxWidth[i % columns] - entry.length() + 2]).replace('\0', ' '));
+                if((i + 1) % columns == 0) System.out.println();
+            }
+            System.out.println();
+        }
+
+    }
+
 }
