@@ -56,13 +56,13 @@ class Commands {
     }
 
     private boolean commandStoreData() {
-        if(!controller.getData().storeData())
+        if (!controller.getData().storeData())
             System.out.println("Failed to store data!");
         return true;
     }
 
     private boolean commandLoadData() {
-        if(!controller.getData().loadData())
+        if (!controller.getData().loadData())
             System.out.println("Failed to load data!");
         return true;
     }
@@ -72,13 +72,13 @@ class Commands {
             String url = "http://localhost:" + controller.getWebServer().getPort();
             String os = System.getProperty("os.name").toLowerCase();
 
-            if(os.contains("win")) {
+            if (os.contains("win")) {
                 Runtime runtime = Runtime.getRuntime();
                 runtime.exec("start " + url);
                 return true;
             }
 
-            if(os.contains("mac")) {
+            if (os.contains("mac")) {
                 Runtime runtime = Runtime.getRuntime();
                 runtime.exec("open " + url);
                 return true;
@@ -108,10 +108,9 @@ class Commands {
     private boolean commandScan() {
         Scanner scanner = new Scanner(controller);
         if (scanner.scan()) {
-            if(!controller.getData().storeData())
+            if (!controller.getData().storeData())
                 Log.error("Failed to store data!");
-        }
-        else {
+        } else {
             System.out.println("Failed to scan!");
         }
         return true;
@@ -208,13 +207,13 @@ class Commands {
 
     void executeFile(String path) {
         DataFile dataFile = new DataFile(path);
-        if(!dataFile.exists()) {
+        if (!dataFile.exists()) {
             System.out.println("Could not find file " + path);
             return;
         }
         String line;
-        while((line = dataFile.readLine()) != null) {
-            if(!parse(line))
+        while ((line = dataFile.readLine()) != null) {
+            if (!parse(line))
                 System.out.println("Unable to parse command '" + line + "'");
         }
         dataFile.close();
@@ -240,11 +239,11 @@ class Commands {
 
         void print() {
             int N = entries.size();
-            for(int i = 0;i < N; ++i) {
+            for (int i = 0; i < N; ++i) {
                 String entry = entries.get(i);
                 System.out.print(entry);
                 System.out.print(new String(new char[maxWidth[i % columns] - entry.length() + 2]).replace('\0', ' '));
-                if((i + 1) % columns == 0) System.out.println();
+                if ((i + 1) % columns == 0) System.out.println();
             }
             System.out.println();
         }

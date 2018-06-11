@@ -149,7 +149,7 @@ class APIServer extends HTTPServer {
 
             // Tag people in image
             Tagger tagger = new Tagger();
-            if(!tagger.tagPeople(controller.getData().getPicturePath(picture), people))
+            if (!tagger.tagPeople(controller.getData().getPicturePath(picture), people))
                 return errorInternalServerError(request, response);
 
             // Send response
@@ -157,8 +157,7 @@ class APIServer extends HTTPServer {
             response.setHeader("Content-Type", "application/json");
             response.addMessage("{\"response\":\"successfully tagged people in picture\"}");
             return true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return errorBadRequest(request, response);
         }
     }
@@ -191,7 +190,7 @@ class APIServer extends HTTPServer {
 
             // Tag people in image
             Tagger tagger = new Tagger();
-            if(!tagger.untagPeople(controller.getData().getPicturePath(picture), people))
+            if (!tagger.untagPeople(controller.getData().getPicturePath(picture), people))
                 return errorInternalServerError(request, response);
 
             // Send response
@@ -199,8 +198,7 @@ class APIServer extends HTTPServer {
             response.setHeader("Content-Type", "application/json");
             response.addMessage("{\"response\":\"successfully untagged people in picture\"}");
             return true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return errorBadRequest(request, response);
         }
     }

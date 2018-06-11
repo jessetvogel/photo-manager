@@ -15,7 +15,7 @@ class Controller {
         commands = new Commands(this);
         data = new Data();
         apiServer = new APIServer(this, API_PORT);
-        webServer = new WebServer(this, WEB_PORT);
+        webServer = new WebServer(WEB_PORT);
     }
 
     Commands getCommands() {

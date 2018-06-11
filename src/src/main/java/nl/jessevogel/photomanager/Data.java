@@ -56,7 +56,7 @@ class Data {
     }
 
     boolean loadData() {
-        if(rootDirectory == null) return false;
+        if (rootDirectory == null) return false;
         clear();
         return loadPicturesData() &&
                 loadAlbumData() &&
@@ -64,7 +64,7 @@ class Data {
     }
 
     boolean storeData() {
-        if(rootDirectory == null) return false;
+        if (rootDirectory == null) return false;
         return storePicturesData() &&
                 storeAlbumData() &&
                 storePeopleData();
@@ -136,10 +136,10 @@ class Data {
             // Load associations with this album
             DataFile albumDataFile = new DataFile(getAlbumDataFile(album));
             albumDataFile.touch();
-            while((line = albumDataFile.readLine()) != null) {
+            while ((line = albumDataFile.readLine()) != null) {
                 int pictureId = Integer.parseInt(line); // TODO: check for NumberFormatException?
                 Picture picture = getPictureById(pictureId);
-                if(picture == null) return false;
+                if (picture == null) return false;
                 album.pictures.add(picture);
             }
             albumDataFile.close();
@@ -172,7 +172,7 @@ class Data {
             // Write file containing associations with this person
             DataFile albumDataFile = new DataFile(getAlbumDataFile(album));
             albumDataFile.touch();
-            for(Picture picture : album.pictures)
+            for (Picture picture : album.pictures)
                 albumDataFile.writeLine("" + picture.id);
             albumDataFile.close();
         }
@@ -202,10 +202,10 @@ class Data {
             // Load associations with this person
             DataFile personDataFile = new DataFile(getPersonDataFile(person));
             personDataFile.touch();
-            while((line = personDataFile.readLine()) != null) {
+            while ((line = personDataFile.readLine()) != null) {
                 int pictureId = Integer.parseInt(line); // TODO: check for NumberFormatException?
                 Picture picture = getPictureById(pictureId);
-                if(picture == null) return false;
+                if (picture == null) return false;
                 person.pictures.add(picture);
             }
             personDataFile.close();
@@ -238,7 +238,7 @@ class Data {
             // Write file containing associations with this person
             DataFile personDataFile = new DataFile(getPersonDataFile(person));
             personDataFile.touch();
-            for(Picture picture : person.pictures)
+            for (Picture picture : person.pictures)
                 personDataFile.writeLine("" + picture.id);
             personDataFile.close();
         }
@@ -309,7 +309,7 @@ class Data {
 
     String getPicturePath(Picture picture) {
         Album album = getAlbumById(picture.albumId);
-        if(album == null) return null;
+        if (album == null) return null;
         return rootDirectory + SEPARATOR + album.path + SEPARATOR + picture.filename;
     }
 
@@ -343,7 +343,7 @@ class Data {
 
     public Picture createPicture(int albumId, String filename) {
         Picture picture = new Picture();
-        picture.id = currentPictureId ++;
+        picture.id = currentPictureId++;
         picture.albumId = albumId;
         picture.filename = filename;
         pictures.add(picture);
@@ -352,7 +352,7 @@ class Data {
 
     public Person createPerson(String name) {
         Person person = new Person();
-        person.id = currentPersonId ++;
+        person.id = currentPersonId++;
         person.name = name;
         people.add(person);
         return person;
@@ -360,7 +360,7 @@ class Data {
 
     public Album createAlbum(String title, String path) {
         Album album = new Album();
-        album.id = currentAlbumId ++;
+        album.id = currentAlbumId++;
         album.title = title;
         album.path = path;
         albums.add(album);
@@ -382,9 +382,10 @@ class Data {
     public String getTagged(Picture picture) {
         boolean first = true;
         StringBuilder sb = new StringBuilder();
-        for(Person person : people) {
-            if(person.pictures.contains(picture)) {
-                if(first) first = false; else sb.append(',');
+        for (Person person : people) {
+            if (person.pictures.contains(picture)) {
+                if (first) first = false;
+                else sb.append(',');
                 sb.append("" + person.id);
             }
         }

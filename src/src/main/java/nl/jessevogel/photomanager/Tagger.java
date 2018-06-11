@@ -7,17 +7,25 @@ import nl.jessevogel.jfifmetadata.segments.APP1Segment;
 import nl.jessevogel.jfifmetadata.segments.Segment;
 import nl.jessevogel.photomanager.data.Person;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
-public class Tagger {
+class Tagger {
 
-    private static final String APPLICATION_SEGMENT_HEADER = "photomanager";
+    private static final String APPLICATION_SEGMENT_HEADER = "photomanager"; // TODO: good name?
 
-    public boolean tagPeople(String path, ArrayList<Person> people) {
+    boolean tagPeople(String path, ArrayList<Person> peopleToTag) {
+        return tagPeople(path, peopleToTag, null);
+    }
+
+    boolean untagPeople(String path, ArrayList<Person> peopleToUntag) {
+        return tagPeople(path, null, peopleToUntag);
+    }
+
+    private boolean tagPeople(String path, ArrayList<Person> peopleToTag, ArrayList<Person> peopleToUntag) {
+        if (peopleToTag == null && peopleToUntag == null) return true;
+
         try {
             // Parse image and get application segment
             JFIFReader reader = new JFIFReader();
@@ -34,61 +42,39 @@ public class Tagger {
                 jsonObject.put("people", jsonPeopleArray);
             }
 
-            // Only add the names that are not yet in the array
-            for (Person person : people) {
-                boolean found = false;
+            // Add the names that are not yet in the array
+            if (peopleToTag != null) {
+                for (Person person : peopleToTag) {
+                    boolean found = false;
+                    int n = jsonPeopleArray.length();
+                    for (int i = 0; i < n; ++i) {
+                        if (jsonPeopleArray.getString(i).equals(person.name)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                        jsonPeopleArray.put(person.name);
+                }
+            }
+
+            // Preserve the names that are not in the array list
+            if (peopleToUntag != null) {
+                JSONArray jsonPeopleArrayUpdated = new JSONArray();
                 int n = jsonPeopleArray.length();
                 for (int i = 0; i < n; ++i) {
-                    if (jsonPeopleArray.getString(i).equals(person.name)) {
-                        found = true;
-                        break;
+                    String name = jsonPeopleArray.getString(i);
+                    boolean found = false;
+                    for (Person person : peopleToUntag) {
+                        if (person.name.equals(name)) {
+                            found = true;
+                            break;
+                        }
                     }
+                    if (!found) jsonPeopleArrayUpdated.put(name);
                 }
-                if (!found)
-                    jsonPeopleArray.put(person.name);
+                jsonObject.put("people", jsonPeopleArrayUpdated);
             }
-
-            // Update segment and break out of loop
-            storeJSONInApplicationSegment(app1Segment, jsonObject);
-
-            // Update image
-            JFIFWriter writer = new JFIFWriter();
-            writer.write(image, path);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean untagPeople(String path, ArrayList<Person> people) {
-        try {
-            // Parse image and get application segment
-            JFIFReader reader = new JFIFReader();
-            JFIFImage image = reader.read(path);
-            APP1Segment app1Segment = getApplicationSegment(image);
-
-            // Parse JSON
-            JSONObject jsonObject = getJSONFromApplicationSegment(app1Segment);
-            if (!jsonObject.has("people"))
-                return true; // If it does not contains a 'people' field, then there is nothing to be done
-            JSONArray jsonPeopleArray = jsonObject.getJSONArray("people");
-
-            // Only preserve the names that are not in the arraylist
-            JSONArray jsonPeopleArrayUpdated = new JSONArray();
-            int n = jsonPeopleArray.length();
-            for (int i = 0; i < n; ++i) {
-                String name = jsonPeopleArray.getString(i);
-                boolean found = false;
-                for (Person person : people) {
-                    if (person.name.equals(name)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) jsonPeopleArrayUpdated.put(name);
-            }
-            jsonObject.put("people", jsonPeopleArrayUpdated);
 
             // Update segment and break out of loop
             storeJSONInApplicationSegment(app1Segment, jsonObject);
@@ -126,8 +112,7 @@ public class Tagger {
         try {
             // Try to parse JSON object from segment data
             jsonObject = new JSONObject(new String(app1Segment.segmentData, "UTF-8"));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             // If it fails, create a new JSON object
             jsonObject = new JSONObject();
         }

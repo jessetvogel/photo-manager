@@ -12,6 +12,7 @@ public class Log {
 
     static void print(String message) {
         System.out.print(message);
+        System.out.flush();
     }
 
     static void println(String message) {
@@ -24,8 +25,8 @@ public class Log {
 
     static void updatePercentage(int percentage) {
         System.out.print("\b\b\b\b");
-        if(percentage < 10) System.out.print(" ");
-        if(percentage < 100) System.out.print(" ");
+        if (percentage < 10) System.out.print(" ");
+        if (percentage < 100) System.out.print(" ");
         System.out.print("" + percentage + "%");
         System.out.flush();
     }

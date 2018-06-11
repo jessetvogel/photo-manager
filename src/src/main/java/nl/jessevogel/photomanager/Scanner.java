@@ -28,6 +28,11 @@ class Scanner {
     }
 
     boolean scan() {
+        // Make sure the current root directory is a directory
+        String rootDirectory = controller.getData().getRootDirectory();
+        if (rootDirectory == null) return false;
+        File directory = new File(rootDirectory);
+        if (!directory.exists() || !directory.isDirectory()) return false;
 
         /*
          * Step 1. Check if pictures are deleted
@@ -36,35 +41,29 @@ class Scanner {
          * Step 4. Create smaller versions / thumbnails
          */
 
-        // Make sure the current root directory is a directory
-        String rootDirectory = controller.getData().getRootDirectory();
-        if (rootDirectory == null) return false;
-        File directory = new File(rootDirectory);
-        if (!directory.exists() || !directory.isDirectory()) return false;
-
         // Check if pictures are deleted
         Log.println("Scan for deleted pictures");
         HashSet<Picture> removedPictures = new HashSet<>();
         for (Picture picture : controller.getData().getPictures()) {
             String picturePath = controller.getData().getPicturePath(picture);
-            if(picturePath == null || !(new File(picturePath)).exists())
+            if (picturePath == null || !(new File(picturePath)).exists())
                 removedPictures.add(picture);
         }
         controller.getData().getPictures().removeAll(removedPictures);
 
         // If pictures were deleted, remove them from people and albums
         int N = removedPictures.size();
-        Log.println("" + N + " picture(s) were deleted");
-        if(N > 0) {
+        Log.println("Found " + N + " deleted picture(s)");
+        if (N > 0) {
             HashSet<Person> removedPeople = new HashSet<>();
             HashSet<Album> removedAlbums = new HashSet<>();
-            for(Person person : controller.getData().getPeople()) {
+            for (Person person : controller.getData().getPeople()) {
                 person.pictures.removeAll(removedPictures);
-                if(person.pictures.size() == 0) removedPeople.add(person);
+                if (person.pictures.size() == 0) removedPeople.add(person);
             }
-            for(Album album : controller.getData().getAlbums()) {
+            for (Album album : controller.getData().getAlbums()) {
                 album.pictures.removeAll(removedPictures);
-                if(album.pictures.size() == 0) removedAlbums.add(album);
+                if (album.pictures.size() == 0) removedAlbums.add(album);
             }
             controller.getData().getPeople().removeAll(removedPeople);
             controller.getData().getAlbums().removeAll(removedAlbums);

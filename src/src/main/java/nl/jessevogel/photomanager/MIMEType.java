@@ -28,15 +28,15 @@ public class MIMEType {
     }
 
     public static String getByExtension(String extension) {
-        if(singleton == null) singleton = new MIMEType();
+        if (singleton == null) singleton = new MIMEType();
         String type = singleton.types.get(extension);
-        if(type != null) return type;
+        if (type != null) return type;
         return DEFAULT_TYPE;
     }
 
     public static String getByFile(String path) {
         int i = path.lastIndexOf('.');
-        if(i == -1) return getByExtension("");
+        if (i == -1) return getByExtension("");
         return getByExtension(path.substring(i + 1));
     }
 }
