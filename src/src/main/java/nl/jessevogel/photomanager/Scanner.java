@@ -105,8 +105,7 @@ class Scanner {
         return success;
     }
 
-    private boolean indexDirectory(File directory, ArrayList<Picture> pictures) {
-        // Don't scan the data folder or hidden folders
+    private boolean indexDirectory(File directory, ArrayList<Picture> pictures) {// Don't scan the data folder or hidden folders
         if (directory.getAbsolutePath().equals(controller.getData().getDataFolder())) return true;
         if (directory.getName().startsWith(".")) return true;
 

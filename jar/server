@@ -1,4 +1,4 @@
 #!/bin/bash
 
-java -jar server.jar
+java -jar photomanager-1.0.0.jar
 
