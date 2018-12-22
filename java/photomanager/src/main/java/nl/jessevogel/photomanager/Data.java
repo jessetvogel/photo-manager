@@ -47,7 +47,7 @@ class Data {
         File file = new File(directory);
         if (!file.exists() || !file.isDirectory())
             return false;
-        rootDirectory = directory;
+        rootDirectory = file.getAbsolutePath();
         return true;
     }
 

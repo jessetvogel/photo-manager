@@ -6,7 +6,7 @@ import nl.jessevogel.photomanager.httpserver.HTTPServer;
 
 class WebServer extends HTTPServer {
 
-    private static final String WEB_DIRECTORY = "../client";
+    private static final String WEB_DIRECTORY = "client";
 
     WebServer(int port) {
         super(port);

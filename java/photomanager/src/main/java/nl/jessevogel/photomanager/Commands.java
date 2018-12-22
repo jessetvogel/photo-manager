@@ -124,8 +124,16 @@ class Commands {
         System.out.println("  data people                 - show list of people");
         System.out.println("  data pictures               - show list of pictures");
         System.out.println();
+        System.out.println("  loaddata                    - load data");
+        System.out.println("  storedata                   - store data");
+        System.out.println();
         System.out.println("  get root_directory          - get root directory");
         System.out.println("  set root_directory <path>   - set root directory");
+        System.out.println();
+        System.out.println("  scan                        - scan for new data");
+        System.out.println("  wipe                        - wipe all data");
+        System.out.println("  client                      - start client window");
+        System.out.println();
 
         return true;
     }

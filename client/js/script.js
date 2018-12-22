@@ -2,7 +2,7 @@ $(document).ready(() => {
   // Set click event listeners
   $('#button-albums').click(loadAlbums);
   $('#button-people').click(loadPeople);
-  $('#button-settings').click(loadSettings);
+  // $('#button-settings').click(loadSettings);
 
   // Load people and albums already once
   data.updatePeople();

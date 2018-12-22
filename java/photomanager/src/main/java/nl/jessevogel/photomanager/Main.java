@@ -11,7 +11,7 @@ public class Main {
         controller.getWebServer().start();
 
         // Read settings file
-        controller.getCommands().executeFile(".preferences");
+        controller.getCommands().executeFile("photomanager.conf");
 
         // Read commands
         controller.getCommands().read();

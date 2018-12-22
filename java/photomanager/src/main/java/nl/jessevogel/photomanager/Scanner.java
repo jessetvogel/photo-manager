@@ -105,14 +105,18 @@ class Scanner {
         return success;
     }
 
-    private boolean indexDirectory(File directory, ArrayList<Picture> pictures) {// Don't scan the data folder or hidden folders
+    private boolean indexDirectory(File directory, ArrayList<Picture> pictures) {
+        // Don't scan the data folder or hidden folders
         if (directory.getAbsolutePath().equals(controller.getData().getDataFolder())) return true;
         if (directory.getName().startsWith(".")) return true;
 
         // Determine directory path
         String directoryPath = directory.getAbsolutePath();
         String rootDirectory = controller.getData().getRootDirectory();
-        if (directoryPath.startsWith(rootDirectory) && directoryPath.length() > rootDirectory.length())
+        if (!directoryPath.startsWith(rootDirectory)) return true; // TODO: this should not be possible right?
+        if(directoryPath.equals(rootDirectory))
+            directoryPath = "";
+        else
             directoryPath = directoryPath.substring(rootDirectory.length() + 1);
 
         // Go through all files in this directory
@@ -128,6 +132,9 @@ class Scanner {
                     return false;
                 }
             } else {
+                // Do not index files from root directory
+                if(directoryPath.length() == 0) continue;
+
                 // Only process files that should be processed
                 if (!shouldProcessFile(file)) continue;
 
