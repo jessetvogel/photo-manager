@@ -106,9 +106,11 @@ class Scanner {
     }
 
     private boolean indexDirectory(File directory, ArrayList<Picture> pictures) {
-        // Don't scan the data folder or hidden folders
+        // Don't scan the data folder
         if (directory.getAbsolutePath().equals(controller.getData().getDataFolder())) return true;
-        if (directory.getName().startsWith(".")) return true;
+        // Don't scan hidden folders (but allow for ..)
+        String directoryName = directory.getName();
+        if (directoryName.startsWith(".") && !directoryName.startsWith("..")) return true;
 
         // Determine directory path
         String directoryPath = directory.getAbsolutePath();
@@ -206,7 +208,7 @@ class Scanner {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Failed to extract metadata from " + file.getAbsolutePath());
         }
 
         return true;
