@@ -1,10 +1,8 @@
 package nl.jessevogel.photomanager.httpserver;
 
-import nl.jessevogel.photomanager.Log;
 import nl.jessevogel.photomanager.MIMEType;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -30,7 +28,7 @@ public abstract class HTTPServer {
             thread.start();
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Failed to start HTTP server");
             return false;
         }
     }
@@ -41,7 +39,7 @@ public abstract class HTTPServer {
             serverSocket.close();
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Failed to stop HTTP server");
             return false;
         }
     }
@@ -65,7 +63,7 @@ public abstract class HTTPServer {
             } catch (SocketException e) {
                 // The socket closed, this is totally fine!
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println("Failed to accept client");
             }
         }
     }
@@ -89,11 +87,11 @@ public abstract class HTTPServer {
 
                 // Send response and close socket
                 if (!response.send(clientSocket.getOutputStream()))
-                    Log.warning("Unable to send response to client");
+                    System.err.println("Unable to send response to client");
                 clientSocket.close();
 
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println("Failed to handle client");
             }
         }
 
@@ -139,7 +137,7 @@ public abstract class HTTPServer {
             while ((n = inputStream.read(buffer)) != -1)
                 response.addMessage(buffer, 0, n);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Failed to send file to client");
         }
 
         return true;

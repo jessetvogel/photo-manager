@@ -24,7 +24,7 @@ class DataFile {
             if (file.exists() && !file.isDirectory()) return;
             if (file.getParentFile().mkdirs()) file.createNewFile();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("Failed to touch file " + path);
         }
     }
 
@@ -44,7 +44,7 @@ class DataFile {
                 type = Type.Reading;
                 lineNumber = 0;
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.error("Failed to open file for reading " + path);
                 return null;
             }
         }
@@ -54,7 +54,7 @@ class DataFile {
             lineNumber++;
             return reader.readLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("Failed to read from file " + path);
             return null;
         }
     }
@@ -70,7 +70,7 @@ class DataFile {
                 type = Type.Writing;
                 lineNumber = 0;
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.error("Failed to open file for writing " + path);
                 return false;
             }
         }
@@ -94,7 +94,7 @@ class DataFile {
                 reader.close();
                 type = Type.Closed;
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.error("Failed to close file " + path);
             }
             return;
         }

@@ -169,8 +169,11 @@ class Scanner {
     }
 
     private boolean shouldProcessFile(File file) {
-        // Check the extension
+        // Don't allow for hidden files
         String fileName = file.getName();
+        if(fileName.startsWith(".")) return false;
+
+        // Check the extension
         int i = fileName.lastIndexOf('.');
         return i >= 0 && allowedExtensions.contains(fileName.substring(i + 1).toLowerCase());
     }
@@ -208,7 +211,7 @@ class Scanner {
                 }
             }
         } catch (Exception e) {
-            System.out.println("Failed to extract metadata from " + file.getAbsolutePath());
+            Log.error("Failed to extract metadata from " + file.getAbsolutePath());
         }
 
         return true;

@@ -16,7 +16,7 @@ class Thumbnailator {
             net.coobird.thumbnailator.Thumbnails.of(sourcePath).size(size, size).toFile(destinationPath);
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("Failed to resize file " + sourcePath);
             return false;
         }
     }

@@ -19,6 +19,10 @@ public class Log {
         System.out.println(message);
     }
 
+    static void println() {
+        System.out.println();
+    }
+
     public static void warning(String message) {
         System.out.println("[WARNING] " + message);
     }

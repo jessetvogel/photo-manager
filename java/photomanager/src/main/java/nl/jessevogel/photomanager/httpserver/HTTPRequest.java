@@ -81,7 +81,7 @@ public class HTTPRequest {
             }
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Failed to receive HTTP request");
             return false;
         }
     }

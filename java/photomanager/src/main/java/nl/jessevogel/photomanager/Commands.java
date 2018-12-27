@@ -30,10 +30,10 @@ class Commands {
                 line = line.trim();
                 if (line.equals("exit")) break;
                 if (!parse(line))
-                    System.out.println("Unable to parse command '" + line + "'");
+                    Log.println("Unable to parse command '" + line + "'");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("Failed to read commands");
         }
     }
 
@@ -57,13 +57,13 @@ class Commands {
 
     private boolean commandStoreData() {
         if (!controller.getData().storeData())
-            System.out.println("Failed to store data!");
+            Log.println("Failed to store data");
         return true;
     }
 
     private boolean commandLoadData() {
         if (!controller.getData().loadData())
-            System.out.println("Failed to load data!");
+            Log.println("Failed to load data");
         return true;
     }
 
@@ -91,10 +91,10 @@ class Commands {
 //                return true;
 //            }
 
-            System.out.println("Command 'client' is only implemented for Windows and macOS.");
+            Log.println("Command 'client' is only implemented for Windows and macOS");
             return false;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("Failed to launch client");
             return false;
         }
     }
@@ -109,31 +109,31 @@ class Commands {
         Scanner scanner = new Scanner(controller);
         if (scanner.scan()) {
             if (!controller.getData().storeData())
-                Log.error("Failed to store data!");
+                Log.error("Failed to store data");
         } else {
-            System.out.println("Failed to scan!");
+            Log.println("Failed to scan");
         }
         return true;
     }
 
     private boolean commandHelp() {
-        System.out.println("Commands:");
-        System.out.println("  help                        - show list of commands");
-        System.out.println();
-        System.out.println("  data albums                 - show list of albums");
-        System.out.println("  data people                 - show list of people");
-        System.out.println("  data pictures               - show list of pictures");
-        System.out.println();
-        System.out.println("  loaddata                    - load data");
-        System.out.println("  storedata                   - store data");
-        System.out.println();
-        System.out.println("  get root_directory          - get root directory");
-        System.out.println("  set root_directory <path>   - set root directory");
-        System.out.println();
-        System.out.println("  scan                        - scan for new data");
-        System.out.println("  wipe                        - wipe all data");
-        System.out.println("  client                      - start client window");
-        System.out.println();
+        Log.println("Commands:");
+        Log.println("  help                        - show list of commands");
+        Log.println();
+        Log.println("  data albums                 - show list of albums");
+        Log.println("  data people                 - show list of people");
+        Log.println("  data pictures               - show list of pictures");
+        Log.println();
+        Log.println("  loaddata                    - load data");
+        Log.println("  storedata                   - store data");
+        Log.println();
+        Log.println("  get root_directory          - get root directory");
+        Log.println("  set root_directory <path>   - set root directory");
+        Log.println();
+        Log.println("  scan                        - scan for new data");
+        Log.println("  wipe                        - wipe all data");
+        Log.println("  client                      - start client window");
+        Log.println();
 
         return true;
     }
@@ -192,7 +192,7 @@ class Commands {
         if (parts.length != 2) return false;
 
         if (parts[1].equals("root_directory")) {
-            System.out.println(controller.getData().getRootDirectory());
+            Log.println(controller.getData().getRootDirectory());
             return true;
         }
 
@@ -204,7 +204,7 @@ class Commands {
 
         if (parts[1].equals("root_directory")) {
             if (!controller.getData().setRootDirectory(parts[2])) {
-                System.out.println("Failed to set root directory to '" + parts[2] + "'");
+                Log.println("Failed to set root directory to '" + parts[2] + "'");
                 return false;
             }
             return true;
@@ -216,13 +216,13 @@ class Commands {
     void executeFile(String path) {
         DataFile dataFile = new DataFile(path);
         if (!dataFile.exists()) {
-            System.out.println("Could not find file " + path);
+            Log.println("Could not find file " + path);
             return;
         }
         String line;
         while ((line = dataFile.readLine()) != null) {
             if (!parse(line))
-                System.out.println("Unable to parse command '" + line + "'");
+                Log.println("Unable to parse command '" + line + "'");
         }
         dataFile.close();
     }
@@ -251,9 +251,9 @@ class Commands {
                 String entry = entries.get(i);
                 System.out.print(entry);
                 System.out.print(new String(new char[maxWidth[i % columns] - entry.length() + 2]).replace('\0', ' '));
-                if ((i + 1) % columns == 0) System.out.println();
+                if ((i + 1) % columns == 0) Log.println();
             }
-            System.out.println();
+            Log.println();
         }
 
     }

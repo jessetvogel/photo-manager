@@ -84,7 +84,7 @@ class Tagger {
             writer.write(image, path);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("Failed to tag people in " + path);
             return false;
         }
     }

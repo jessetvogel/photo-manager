@@ -53,7 +53,7 @@ public class HTTPResponse {
             outputStream.flush();
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Failed to send HTTP response");
             return false;
         }
     }
