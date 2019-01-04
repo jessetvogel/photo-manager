@@ -99,11 +99,11 @@ class Tagger {
             return app1Segment;
         }
 
-        // If it does not exist, create and add it
+        // If it does not exist, create and insert it (right before the last segment which is the '0xFFDA -- 0xFFD9' part)
         APP1Segment app1Segment = new APP1Segment();
         app1Segment.segmentHeader = APPLICATION_SEGMENT_HEADER;
         app1Segment.segmentData = new byte[0];
-        image.addSegment(app1Segment);
+        image.addSegment(image.amountOfSegments() - 1, app1Segment);
         return app1Segment;
     }
 

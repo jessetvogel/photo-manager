@@ -1,5 +1,6 @@
 package nl.jessevogel.jfifmetadata;
 
+import nl.jessevogel.jfifmetadata.segments.APP1Segment;
 import nl.jessevogel.jfifmetadata.segments.Segment;
 
 import java.util.ArrayList;
@@ -16,7 +17,16 @@ public class JFIFImage {
         segments.add(segment);
     }
 
+    public void addSegment(int index, Segment segment) {
+        segments.add(index, segment);
+    }
+
+    public int amountOfSegments() {
+        return segments.size();
+    }
+
     public ArrayList<Segment> getSegments() {
         return segments;
     }
+
 }
