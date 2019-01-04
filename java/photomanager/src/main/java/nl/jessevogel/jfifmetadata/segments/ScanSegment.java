@@ -19,7 +19,9 @@ public class ScanSegment extends Segment {
             if((data[i] & 0xFF) == 0xFF && (data[i + 1] & 0xFF) == 0xD9) break;
 
         this.data = Arrays.copyOfRange(data, pointer, i);
-        return i + 2;
+
+        // Skip to end of data to prevent reading trailing data
+        return data.length;
     }
 
     @Override

@@ -31,7 +31,7 @@ public class JFIFReader {
     private int readSegment(byte[] data, int pointer, JFIFImage image) throws Exception {
         // Markers should be of the form '0xFF 0x..'
         int FF = data[pointer++] & 0xFF;
-        if (FF != 0xFF) throw new Exception("Invalid JFIF file");
+        if (FF != 0xFF) throw new Exception("Invalid JFIF file: expected 0xFF at position " + (pointer - 1));
         int markerCode = data[pointer++] & 0xFF;
 
         // Depending on marker type, create segments
@@ -59,10 +59,17 @@ public class JFIFReader {
             case 0xD6:
             case 0xD7:
             case 0xD8:
-            case 0xD9:
                 segment = new GeneralSegment(markerCode);
                 image.addSegment(segment);
                 break;
+
+            case 0xD9:
+                // End of image
+                segment = new GeneralSegment(markerCode);
+                image.addSegment(segment);
+
+                // Skip to end of data to prevent reading trailing data
+                return data.length;
 
             default:
                 segment = new GeneralSegment(markerCode);
@@ -77,7 +84,7 @@ public class JFIFReader {
     private int readMetadataSegment(byte[] data, int pointer, JFIFImage image) throws Exception {
         // Markers should be of the form '0xFF 0x..'
         int FF = data[pointer++] & 0xFF;
-        if (FF != 0xFF) throw new Exception("Invalid JFIF file");
+        if (FF != 0xFF) throw new Exception("Invalid JFIF file: expected 0xFF at position " + (pointer - 1));
         int markerCode = data[pointer++] & 0xFF;
 
         // Only parse if 0xE1 segment
@@ -91,11 +98,13 @@ public class JFIFReader {
                 break;
 
             case 0xDA:
+                // Read until 0xFFD9 (end of image) is found
                 for (; pointer < data.length - 1; ++pointer)
                     if ((data[pointer] & 0xFF) == 0xFF && (data[pointer + 1] & 0xFF) == 0xD9)
                         break;
-                pointer += 2;
-                break;
+
+                // Prevent reading any trailing data after EOI
+                return data.length;
 
             case 0xD0:
             case 0xD1:
@@ -106,8 +115,11 @@ public class JFIFReader {
             case 0xD6:
             case 0xD7:
             case 0xD8:
-            case 0xD9:
                 break;
+
+            case 0xD9:
+                // End of image marker: skip to end of data to prevent reading trailing data
+                return data.length;
 
             default:
                 int length = 256 * (data[pointer] & 0xFF) + (data[pointer + 1] & 0xFF);
