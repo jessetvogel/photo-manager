@@ -1,21 +1,20 @@
 const api = {
-  // url = 'https://www.robertvankammen.nl:9090';
   url: 'http://' + window.location.hostname + ':4321',
 
-  request: (endpoint, callback) => {
-    $.ajax({
-      url: api.url + endpoint,
-      // headers: {
-      //   'Authorization': 'Basic cm9iZXJ0OnRlc3Q='
-      // }
-    })
-    .done(callback)
-    .fail(api.error);
+  requestJSON: (endpoint, callback) => {
+    var xhr = new XMLHttpRequest();
+    xhr.responseType = 'json';
+    xhr.onload = function() {
+      if(callback != undefined)
+        callback(xhr.response);
+    };
+    xhr.open('GET', api.url + endpoint);
+    xhr.send();
 
     console.log('[API request] ' + api.url + endpoint);
   },
 
-  requestPicture: (endpoint, callback) => {
+  requestBlob: (endpoint, callback) => {
     var xhr = new XMLHttpRequest();
     xhr.onload = function() {
       var reader = new FileReader();
@@ -32,27 +31,27 @@ const api = {
 
   error: (data) => status.updateHealth(false),
 
-  health: (callback) => api.request('/health', callback),
+  health: (callback) => api.requestJSON('/health', callback),
 
-  people: (callback) => api.request('/people', callback),
+  people: (callback) => api.requestJSON('/people', callback),
 
-  albums: (callback) => api.request('/albums', callback),
+  albums: (callback) => api.requestJSON('/albums', callback),
   
   search: (filters, start, amount, callback) => {
     var filterTerms = '';
     for(var x in filters)
       filterTerms += '&' + x + '=' + filters[x].join(';');
-    api.request('/search?start=' + start + '&amount=' + amount + filterTerms, callback);
+    api.requestJSON('/search?start=' + start + '&amount=' + amount + filterTerms, callback);
   },
 
-  picture: (id, size, callback) => api.requestPicture('/pictures/' + id + '?size=' + size, callback),
+  media: (id, size, callback) => api.requestBlob('/media/' + id + '?size=' + size, callback),
 
-  profilePicture: (id, callback) => api.requestPicture('/people/' + id + '/profilepicture', callback),
+  profilePicture: (id, callback) => api.requestBlob('/people/' + id + '/picture', callback),
 
-  coverPicture: (id, callback) => api.requestPicture('/albums/' + id + '/cover', callback),
+  albumCover: (id, callback) => api.requestBlob('/albums/' + id + '/cover', callback),
 
-  tag: (id, names, callback) => api.request('/pictures/' + id + '/tag?names=' + names.join(','), callback),
+  tag: (id, names, callback) => api.requestJSON('/media/' + id + '/tag?names=' + names.join(','), callback),
   
-  untag: (id, names, callback) => api.request('/pictures/' + id + '/untag?names=' + names.join(','), callback),
+  untag: (id, names, callback) => api.requestJSON('/media/' + id + '/untag?names=' + names.join(','), callback),
 
 };

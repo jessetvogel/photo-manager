@@ -1,10 +1,11 @@
 package nl.jessevogel.photomanager;
 
 import nl.jessevogel.photomanager.data.Album;
+import nl.jessevogel.photomanager.data.Medium;
 import nl.jessevogel.photomanager.data.Person;
-import nl.jessevogel.photomanager.data.Picture;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ class Commands {
 
     private final static String PS1 = "> ";
 
-    private Controller controller;
+    private final Controller controller;
 
     Commands(Controller controller) {
         this.controller = controller;
@@ -91,7 +92,7 @@ class Commands {
 //                return true;
 //            }
 
-            Log.println("Command 'client' is only implemented for Windows and macOS");
+            Log.println("Command 'client' is only implemented for Windows and macOS. Browse to " + url);
             return false;
         } catch (IOException e) {
             Log.error("Failed to launch client");
@@ -122,7 +123,7 @@ class Commands {
         Log.println();
         Log.println("  data albums                 - show list of albums");
         Log.println("  data people                 - show list of people");
-        Log.println("  data pictures               - show list of pictures");
+        Log.println("  data media                  - show list of media");
         Log.println();
         Log.println("  loaddata                    - load data");
         Log.println("  storedata                   - store data");
@@ -151,7 +152,7 @@ class Commands {
                 table.add("" + album.id);
                 table.add(album.title);
                 table.add(album.path);
-                table.add("" + album.pictures.size());
+                table.add("" + album.media.size());
             }
             table.print();
             return true;
@@ -165,21 +166,21 @@ class Commands {
             for (Person person : controller.getData().getPeople()) {
                 table.add("" + person.id);
                 table.add(person.name);
-                table.add("" + person.pictures.size());
+                table.add("" + person.media.size());
             }
             table.print();
             return true;
         }
 
-        if (parts[1].equals("pictures")) {
+        if (parts[1].equals("media")) {
             Table table = new Table(3);
             table.add("id");
             table.add("filename");
             table.add("album id");
-            for (Picture picture : controller.getData().getPictures()) {
-                table.add("" + picture.id);
-                table.add(picture.filename);
-                table.add("" + picture.albumId);
+            for (Medium medium : controller.getData().getMedia()) {
+                table.add("" + medium.id);
+                table.add(medium.filename);
+                table.add("" + medium.albumId);
             }
             table.print();
             return true;
@@ -227,11 +228,11 @@ class Commands {
         dataFile.close();
     }
 
-    private class Table {
+    private static class Table {
 
-        private int[] maxWidth;
-        private int columns;
-        private ArrayList<String> entries;
+        private final int[] maxWidth;
+        private final int columns;
+        private final ArrayList<String> entries;
 
         Table(int columns) {
             this.columns = columns;

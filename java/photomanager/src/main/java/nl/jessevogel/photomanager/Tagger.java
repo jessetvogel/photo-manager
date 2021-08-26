@@ -9,6 +9,7 @@ import nl.jessevogel.photomanager.data.Person;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 class Tagger {
@@ -111,7 +112,7 @@ class Tagger {
         JSONObject jsonObject;
         try {
             // Try to parse JSON object from segment data
-            jsonObject = new JSONObject(new String(app1Segment.segmentData, "UTF-8"));
+            jsonObject = new JSONObject(new String(app1Segment.segmentData, StandardCharsets.UTF_8));
         } catch (Exception e) {
             // If it fails, create a new JSON object
             jsonObject = new JSONObject();

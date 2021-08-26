@@ -7,15 +7,14 @@ const focus = {
 		focus.list.push(object);
 	},
 
-	close: () => focus.list.pop().close(),
+	close: () => {
+		if(focus.list.length > 0)
+			focus.list.pop().close()
+	},
 
 	current: () => focus.list[focus.list.length - 1]
 
 };
-
-
-window.
-
 
 window.onkeydown = (event) => {
 	var key = event.keyCode ? event.keyCode : event.which;

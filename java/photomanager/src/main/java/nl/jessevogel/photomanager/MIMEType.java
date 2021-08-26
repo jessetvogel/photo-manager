@@ -8,7 +8,7 @@ public class MIMEType {
     private static MIMEType singleton = null;
     private static final String DEFAULT_TYPE = "text/plain";
 
-    private Map<String, String> types;
+    private final Map<String, String> types;
 
     private MIMEType() {
         types = new HashMap<>();
@@ -25,6 +25,9 @@ public class MIMEType {
         types.put("jpg", "image/jpeg");
         types.put("jpeg", "image/jpeg");
         types.put("png", "image/png");
+
+        // Videos
+        types.put("mp4", "video/mp4");
     }
 
     public static String getByExtension(String extension) {

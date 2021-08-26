@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class HTTPResponse {
     private String statusLine;
-    private Map<String, String> headers;
-    private ByteArrayOutputStream message;
+    private final Map<String, String> headers;
+    private final ByteArrayOutputStream message;
 
     public HTTPResponse() {
         headers = new HashMap<>();

@@ -1,8 +1,8 @@
-$(document).ready(() => {
+function initStatus() {
   // Set timer to check server helath
   status.checkHealth();
   setInterval(status.checkHealth, 5000);
-});
+};
 
 const status = {
 
@@ -10,10 +10,17 @@ const status = {
   checkHealth: () => api.health((healthy) => status.updateHealth(healthy)),
 
   updateHealth: (healthy) => {
-    if(healthy)
-      $('#health').empty().append($('<span>').addClass('glyphicon glyphicon-signal')).append($('<span>').text('online')).addClass('healthy').removeClass('unhealthy');
-    else
-      $('#health').empty().append($('<span>').addClass('glyphicon glyphicon-exclamation-sign')).append($('<span>').text('offline')).addClass('unhealthy').removeClass('healthy');
+    const health = $('#health');
+    if(healthy) {
+      setHTML(health, '<span class="glyphicon glyphicon-signal"></span><span>online</span>');
+      addClass(health, 'healthy');
+      removeClass(health, 'unhealthy');
+    }
+    else {
+      setHTML(health, '<span class="glyphicon glyphicon-exclamation-sign"></span><span>offline</span>');
+      addClass(health, 'unhealthy');
+      removeClass(health, 'healthy');
+    }
   },
 
   error: (message) => {

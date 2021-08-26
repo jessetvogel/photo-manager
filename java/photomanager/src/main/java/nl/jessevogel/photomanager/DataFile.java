@@ -6,7 +6,7 @@ class DataFile {
 
     enum Type {Reading, Writing, Closed}
 
-    private String path;
+    private final String path;
     private Type type;
 
     private PrintWriter writer;
@@ -26,6 +26,11 @@ class DataFile {
         } catch (IOException e) {
             Log.error("Failed to touch file " + path);
         }
+    }
+
+    void touchWrite() {
+        touch();
+        write();
     }
 
     boolean exists() {
@@ -59,21 +64,26 @@ class DataFile {
         }
     }
 
+    private boolean write() {
+        try {
+            writer = new PrintWriter(path);
+            type = Type.Writing;
+            lineNumber = 0;
+            return true;
+        } catch (IOException e) {
+            Log.error("Failed to open file for writing " + path);
+            return false;
+        }
+    }
+
     boolean writeLine(String line) {
         // If not writing nor closed, can't read
-        if (type != Type.Writing && type != Type.Closed) return false;
+        if (type != Type.Writing && type != Type.Closed)
+            return false;
 
         // If closed, open for writing
-        if (type == Type.Closed) {
-            try {
-                writer = new PrintWriter(path);
-                type = Type.Writing;
-                lineNumber = 0;
-            } catch (IOException e) {
-                Log.error("Failed to open file for writing " + path);
-                return false;
-            }
-        }
+        if (type == Type.Closed && !write())
+            return false;
 
         // Write line
         lineNumber++;

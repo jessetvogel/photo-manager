@@ -1,7 +1,6 @@
 const feed = {
-
 	// Constants
-	PICTURES_PER_BATCH: 12,
+	MEDIA_PER_BATCH: 12,
 	FEED_REFRESH_TIME: 100,
 
 	// Variables
@@ -9,7 +8,7 @@ const feed = {
 	loadingBatch: false,
 	reachedEnd: false,
 	interval: null,
-	pictures: [],
+	media: [],
 
 	// Methods
 	start: (filters) => {
@@ -19,10 +18,10 @@ const feed = {
 		// Set interval to check if should load new batch
 		feed.interval = setInterval(() => {
 			// Stop when feed disappears
-			if($('.pictures-feed').length == 0) {
-					clearInterval(feed.interval);
-					feed.interval = null;
-					return;
+			if($('.media-feed') == undefined) {
+				clearInterval(feed.interval);
+				feed.interval = null;
+				return;
 			}
 
 			// Load batch when necessary
@@ -31,8 +30,8 @@ const feed = {
 		 }, feed.FEED_REFRESH_TIME);
 
 		// Initially, clear the feed, indicate we have not reached the end, are not loading a batch, and load the first batch
-		$('.pictures-feed').empty();
-		feed.pictures = [];
+		clear($('.media-feed'));
+		feed.media = [];
 		feed.reachedEnd = false;
 		feed.loadingBatch = false;
 		feed.loadBatch();
@@ -40,7 +39,7 @@ const feed = {
 
 	active: () => (feed.interval != null),
 
-	shouldUpdate: () => (!feed.reachedEnd && $('.pictures-feed-end').offset().top < $('body').height()),
+	shouldUpdate: () => (!feed.reachedEnd && $('.media-feed-end').getBoundingClientRect().top < document.body.clientHeight),
 
 	loadBatch: () => {
 		// Make sure we don't load a batch if already busy loading one
@@ -48,35 +47,39 @@ const feed = {
 		feed.loadingBatch = true;
 
 		// Add loading icon
-		$('.pictures-feed-end').append($('<div>').addClass('loading'));
+		$('.media-feed-end').append(create('div', '', { 'class': 'loading' }));
 
-		// Load pictures
-		var start = $('.pictures-feed .picture').length;
-		api.search(feed.currentFilters, start, feed.PICTURES_PER_BATCH, (response) => {
-			// If no pictures were returned, we reached the end of the stream
-			if(response.pictures.length == 0) {
+		// Load media
+		const start = document.querySelectorAll('.media-feed > div').length;
+		api.search(feed.currentFilters, start, feed.MEDIA_PER_BATCH, (response) => {
+			// If no media were returned, we reached the end of the stream
+			if(response.media.length == 0) {
 				feed.reachedEnd = true;
-				$('.pictures-feed-end').html($('<span>').addClass('text-end-of-feed').text('~'));
+				clear($('.media-feed-end'));
+				$('.media-feed-end').append(create('span', '~', { 'class': 'text-end-of-feed' }));
 				return;
 			}
 
-			// Add pictures to feed
-			for(var i = 0;i < response.pictures.length; ++i) {
+			// Add media to feed
+			for(var i = 0;i < response.media.length; ++i) {
 				// Set picture content
-				var picture = $('<div>').addClass('picture');
-				((picture) => api.picture(response.pictures[i].id, 'small', (data) => {
-					picture.css({ backgroundImage: 'url(' + data + ')'});
-					picture.click(() => overlay.show($('.pictures-feed .picture').index(picture)));
-				}))(picture);
-				feed.pictures.push({
-					id: response.pictures[i].id,
-					tagged: response.pictures[i].tagged.map(personId => data.get('person' + personId, 'name'))
+				const type = response.media[i].type;
+				const medium = create('div', '', { 'class': type });
+				const index = start + i;
+				api.media(response.media[i].id, 'small', (data) => {
+					medium.style.backgroundImage = 'url(' + data + ')';
+					onClick(medium, () => overlay.show(index));
 				});
-				$('.pictures-feed').append(picture);
+				feed.media.push({
+					id: response.media[i].id,
+					type: type,
+					tagged: response.media[i].tagged.map(personId => data.get('person' + personId, 'name'))
+				});
+				$('.media-feed').append(medium);
 			}
 
 			// Remove loading icon
-			$('.pictures-feed-end').empty();
+			clear($('.media-feed-end'));
 
 			// Load new batch if necessary, otherwise indicate no batch is being loaded anymore
 			if(feed.shouldUpdate())

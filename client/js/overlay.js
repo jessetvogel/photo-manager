@@ -5,42 +5,64 @@ const overlay = {
 
   // Methods
   open: () => {
-    if($('.overlay').length > 0) return;
+    if($('.overlay') != undefined) return;
 
-    $('<div>')
-      .addClass('overlay')
-      .append($('<div>').addClass('overlay-background'))
-      .append($('<div>').addClass('overlay-content'))
-      .append($('<span>').addClass('glyphicon glyphicon-remove overlay-exit').click(overlay.close))
-      .append($('<div>').addClass('overlay-buttons')
-        .append($('<div>').addClass('download-button').append($('<span>').addClass('glyphicon glyphicon-download-alt')).click(() => { window.open(api.url + '/pictures/' + feed.pictures[overlay.feedIndex].id, '_blank'); }))
-        .append($('<div>').addClass('tag-button').append($('<span>').addClass('glyphicon glyphicon-tag')).click(() => { if(focus.current() == overlay) focus.open(tag); else if(focus.current() == tag) focus.close(); })))
-      .appendTo($('body'));
+    const divOverlay = create('div', '', { 'class': 'overlay' });
+    divOverlay.append(create('div', '', { 'class': 'overlay-background' }));
+    divOverlay.append(create('div', '', { 'class': 'overlay-content' }));
+    const overlayExit = create('span', '', { 'class': 'glyphicon glyphicon-remove overlay-exit' });
+    onClick(overlayExit, focus.close());
+    divOverlay.append(overlayExit);
+    const overlayButtons = create('div', '', { 'class': 'overlay-buttons' });
+    const downloadButton = create('div', '<span class="glyphicon glyphicon-download-alt"></span>', { 'class': 'download-button' });
+    const tagButton = create('div', '<span class="glyphicon glyphicon-tag"></span>', { 'class': 'tag-button' });
+    onClick(downloadButton, () => { window.open(api.url + '/media/' + feed.media[overlay.feedIndex].id, '_blank'); });
+    onClick(tagButton, () => { if(focus.current() == overlay) focus.open(tag); else if(focus.current() == tag) focus.close(); });
+    overlayButtons.append(downloadButton);
+    overlayButtons.append(tagButton);
+    divOverlay.append(overlayButtons);
+    document.body.append(divOverlay);
   },
 
   close: () => $('.overlay').remove(),
 
   show: (index) => {
-    // Make sure there is a feed of pictures
+    // Make sure there is a feed of media
     if(!feed.active()) return;
 
     // Make sure index is valid
     if(index < 0) return;
-    if(index >= feed.pictures.length) { // TODO: this should be done in advance (?)
+    if(index >= feed.media.length) { // TODO: this should be done in advance (?)
       if(!feed.reachedEnd) feed.loadBatch();
       return;
     }
     overlay.feedIndex = index;
 
     // Create overlay if it doesn't exist
-    if($('.overlay').length == 0) focus.open(overlay);
+    if($('.overlay') == undefined)
+      focus.open(overlay);
 
-    // Set picture as overlay content
-    $('.overlay-content').css({ backgroundImage: $('.pictures-feed .picture')[index].style.backgroundImage });
+    // Set medium as overlay content
+    const overlayContent = $('.overlay-content');
+    clear(overlayContent);
+    overlayContent.style.backgroundImage = 'none';
+
+    const type = feed.media[index].type;
+    if(type == 'photo') {
+      overlayContent.style.backgroundImage = document.querySelectorAll('.media-feed > div')[index].style.backgroundImage;
+    }
+    
+    else if(type == 'video') {
+      overlayContent.append(create('video', '<source src="http://localhost:4321/media/' + feed.media[index].id + '" type="video/mp4"></source>', { 'controls': 'true' }));
+    }
+
+    else {
+      console.log('dont know how to show of type ' + type);
+    }
   },
 
-  next: () => { if($('.overlay').length != 0) overlay.show(overlay.feedIndex + 1); },
+  next: () => { if($('.overlay') != undefined) overlay.show(overlay.feedIndex + 1); },
   
-  previous: () => { if($('.overlay').length != 0) overlay.show(overlay.feedIndex - 1); },
+  previous: () => { if($('.overlay') != undefined) overlay.show(overlay.feedIndex - 1); },
 
 };

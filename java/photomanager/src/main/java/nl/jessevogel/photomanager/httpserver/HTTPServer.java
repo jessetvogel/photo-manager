@@ -11,7 +11,7 @@ public abstract class HTTPServer {
 
     private static final int BACKLOG = 10;
 
-    private int port;
+    private final int port;
     private ServerSocket serverSocket;
     private boolean acceptingClients;
 
@@ -70,7 +70,7 @@ public abstract class HTTPServer {
 
     private class HTTPServerClientThread extends Thread {
 
-        private Socket clientSocket;
+        private final Socket clientSocket;
 
         HTTPServerClientThread(Socket clientSocket) {
             this.clientSocket = clientSocket;

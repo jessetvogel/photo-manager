@@ -1,129 +1,148 @@
-$(document).ready(() => {
+function init() {
+  initStatus();
+
   // Set click event listeners
-  $('#button-albums').click(loadAlbums);
-  $('#button-people').click(loadPeople);
+  onClick($('#button-albums'), loadAlbums);
+  onClick($('#button-people'), loadPeople);
   // $('#button-settings').click(loadSettings);
 
   // Load people and albums already once
   data.updatePeople();
   data.updateAlbums();
-});
+};
 
 function loadPeople() {
   // Construct content
-  var content = $('<div>').addClass('content-people');
-  var peopleSearch = $('<div>').addClass('people-search');
-  var peopleTiles = $('<div>').addClass('people-tiles').append($('<div>').addClass('loading'));
+  const content = $('#content');
+  const contentPeople = create('div', '', { 'class': 'content-people' });
+  const peopleSearch = create('div', '', { 'class': 'people-search' });
+  const peopleTiles = create('div', '<div class="loading"></div>', { 'class': 'people-tiles' });
 
   // Search bar
-  peopleSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by name').on('input', function () {
-    var searchTerm = $(this).val().toLowerCase();
-    $('.people-tiles .tile').each(function () {
-      if(searchMatch($(this).find('.name').text(), searchTerm))
-        $(this).show();
+  peopleSearch.append(create('span', '', { 'class': 'glyphicon glyphicon-search' }));
+  const peopleSearchInput = create('input', '', { 'placeholder': 'search by name' });
+  onInput(peopleSearchInput, function () {
+    const searchTerm = peopleSearchInput.value.toLowerCase();
+    for(var tile of document.querySelectorAll('.people-tiles .tile')) {
+      if(searchMatch(tile.querySelector('.name').innerText, searchTerm))
+        tile.style.display = 'block';
       else
-        $(this).hide();
-    });
-  }));
+        tile.style.display = 'none';
+    };
+  });
+  peopleSearch.append(peopleSearchInput);
 
   // Set content
-  content.append(peopleSearch);
-  content.append(peopleTiles);
-  $('#content').html(content);
+  contentPeople.append(peopleSearch);
+  contentPeople.append(peopleTiles);
+  clear(content);
+  content.append(contentPeople);
 
   data.updatePeople(() => {
     // Clear peopleTiles
-    peopleTiles.empty().hide();
+    clear(peopleTiles);
+    peopleTiles.style.display = 'none';
 
     // Create a tile for each person
     for(var key in data.data) {
       if(!key.startsWith('person')) continue;
-      var person = data.data[key];
-      var personId = key.substring(6); // TODO
+
+      const person = data.data[key];
+      const personId = key.substring(6); // TODO
 
       // Set tile content
-      var tile = $('<div>').addClass('tile').append($('<span>').addClass('name').text(person.name));
-      ((tile) => loadProfilePicture(personId, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
+      const tile = create('div', `<span class="name">${person.name}</span>`, { 'class': 'tile' });
+      loadProfilePicture(personId, (data) => tile.style.backgroundImage = 'url(' + data + ')');
 
       // Click event
-      ((personId) => tile.click(() => setContentPerson(personId)))(personId);
-
+      onClick(tile, () => setContentPerson(personId));
+    
       // Add to tiles
       peopleTiles.append(tile);
     }
 
     // Fade in
-    peopleTiles.css({ animation: 'fadein 0.5s' }).show();
+    peopleTiles.style.animation = 'fadein 0.5s';
+    peopleTiles.style.display = 'flex';
   });
 }
 
 function loadAlbums() {
   // Construct content
-  var content = $('<div>').addClass('content-albums');
-  var albumsSearch = $('<div>').addClass('albums-search');
-  var albumsTiles = $('<div>').addClass('albums-tiles').append($('<div>').addClass('loading'));
+  const contentAlbums = create('div', '', { 'class': 'content-albums' });
+  const albumsSearch = create('div', '', { 'class': 'albums-search' });
+  const albumsTiles = create('div', '<div class="loading"></div>', { 'class': 'albums-tiles' });
 
   // Search bar
-  albumsSearch.append($('<span>').addClass('glyphicon glyphicon-search')).append($('<input>').prop('placeholder', 'search by title').on('input', function () {
-    var searchTerm = $(this).val().toLowerCase();
-    $('.albums-tiles .tile').each(function () {
-      if(searchMatch($(this).find('.title').text(), searchTerm))
-        $(this).show();
+  albumsSearch.append(create('span', '', { 'class': 'glyphicon glyphicon-search' }));
+  const albumSearchInput = create('input', '', { 'placeholder': 'search by title' });
+  onInput(albumSearchInput, () => {
+    const searchTerm = albumSearchInput.value.toLowerCase();
+    for(var tile of document.querySelectorAll('.albums-tiles .tile')) {
+      if(searchMatch(tile.querySelector('.title').innerText, searchTerm))
+        tile.style.display = 'flex';
       else
-        $(this).hide();
-    });
-  }));
+        tile.style.display = 'none';
+    };
+  });
+  albumsSearch.append(albumSearchInput);
 
   // Set content
-  content.append(albumsSearch);
-  content.append(albumsTiles);
-  $('#content').html(content);
+  contentAlbums.append(albumsSearch);
+  contentAlbums.append(albumsTiles);
+  const content = $('#content');
+  clear(content);
+  content.append(contentAlbums);
 
   // Get list of albums
   data.updateAlbums(() => {
     // Clear albumsTiles
-    albumsTiles.empty().hide();
+    clear(albumsTiles);
+    albumsTiles.style.display = 'none';
 
     // Create a tile for each album
     for(var key in data.data) {
       if(!key.startsWith('album')) continue;
-      var album = data.data[key];
-      var albumId = key.substring(5); // TODO
+      const album = data.data[key];
+      const albumId = key.substring(5); // TODO
 
       // Set tile content
-      var tile = $('<div>').addClass('tile').append($('<span>').addClass('title').text(album.title));
-      ((tile) => loadCoverPicture(albumId, (data) => tile.css({ backgroundImage: 'url(' + data + ')' })))(tile);
+      const tile = create('div', `<span class="title">${album.title}</span>`, { 'class': 'tile' });
+      loadCoverPicture(albumId, (data) => tile.style.backgroundImage = 'url(' + data + ')');
 
       // Click event
-      ((albumId) => tile.click(() => setContentAlbum(albumId)))(albumId);
+      onClick(tile, () => setContentAlbum(albumId));
 
       // Add to tiles
       albumsTiles.append(tile);
     }
 
     // Fade in
-    albumsTiles.css({ animation: 'fadein 0.5s' }).show();
+    albumsTiles.style.animation = 'fadein 0.5s';
+    albumsTiles.style.display = 'flex';
   });
 }
 
 function setContentPerson(personId) {
   // Construct content
-  var content = $('<div>').addClass('content-person');
-  var personHeader = $('<div>').addClass('person-header');
-  var picturesList = $('<div>').addClass('pictures-feed');
-  var picturesListEnd = $('<div>').addClass('pictures-feed-end');
+  const content = $('#content');
+  const contentPerson = create('div', '', { 'class': 'content-person' });
+  const personHeader = create('div', '', { 'class': 'person-header' });
+  const mediaFeed = create('div', '', { 'class': 'media-feed' });
+  const mediaFeedEnd = create('div', '', { 'class': 'media-feed-end' });
 
   // Person header
-  var profilePicture = $('<div>').addClass('person-profile-picture');
+  const profilePicture = create('div', '', { 'class': 'person-profile-picture' });
   personHeader.append(profilePicture);
-  personHeader.append($('<div>').addClass('person-name').text(data.get('person' + personId, 'name')));
-  loadProfilePicture(personId, (data) => profilePicture.css({ backgroundImage: 'url(' + data + ')'}));
+  personHeader.append(create('div', data.get('person' + personId, 'name'), { 'class': 'person-name' }));
+  loadProfilePicture(personId, (data) => profilePicture.style.backgroundImage = 'url(' + data + ')');
 
   // Set content
-  content.append(personHeader);
-  content.append(picturesList);
-  content.append(picturesListEnd);
-  $('#content').html(content);
+  contentPerson.append(personHeader);
+  contentPerson.append(mediaFeed);
+  contentPerson.append(mediaFeedEnd);
+  clear(content);
+  content.append(contentPerson);
 
   // Start feed
   feed.start({ people: [personId] });
@@ -131,26 +150,28 @@ function setContentPerson(personId) {
 
 function setContentAlbum(albumId) {
   // Construct content
-  var content = $('<div>').addClass('content-album');
-  var albumHeader = $('<div>').addClass('album-header');
-  var picturesList = $('<div>').addClass('pictures-feed');
-  var picturesListEnd = $('<div>').addClass('pictures-feed-end');
+  const content = $('#content');
+  const contentAlbum = create('div', '', { 'class': 'content-album' });
+  const albumHeader = create('div', '', { 'class': 'album-header' });
+  const mediaFeed = create('div', '', { 'class': 'media-feed' });
+  const mediaFeedEnd = create('div', '', { 'class': 'media-feed-end' });
 
   // Album header
-  albumHeader.append($('<div>').addClass('album-title').text(data.get('album' + albumId, 'title')));
+  albumHeader.append(create('div', data.get('album' + albumId, 'title'), { 'class': 'album-title' }));
 
   // Set content
-  content.append(albumHeader);
-  content.append(picturesList);
-  content.append(picturesListEnd);
-  $('#content').html(content);
+  contentAlbum.append(albumHeader);
+  contentAlbum.append(mediaFeed);
+  contentAlbum.append(mediaFeedEnd);
+  clear(content);
+  content.append(contentAlbum);
 
   // Start feed
   feed.start({ albums: [albumId] });
 }
 
 function loadProfilePicture(id, callback) {
-  var profilePictureData = data.get('person' + id, 'profilePicture');
+  var profilePictureData = data.get('person' + id, 'picture');
 
   // In case this person has no picture
   if(profilePictureData == false) {
@@ -168,7 +189,7 @@ function loadProfilePicture(id, callback) {
   else {
     (function (id, callback) {
       api.profilePicture(id, (response) => {
-        data.set('person' + id, 'profilePicture', response);
+        data.set('person' + id, 'picture', response);
         callback(response);
       });
     })(id, callback);
@@ -176,9 +197,8 @@ function loadProfilePicture(id, callback) {
 }
 
 function loadCoverPicture(id, callback) {
-  var coverPictureData = data.get('album' + id, 'coverPicture');
-
   // In case the picture is already loaded
+  const coverPictureData = data.get('album' + id, 'cover');
   if(coverPictureData != null) {
     callback(coverPictureData);
     return;
@@ -186,8 +206,8 @@ function loadCoverPicture(id, callback) {
 
   // Otherwise, load the picture
   (function (id, callback) {
-      api.coverPicture(id, (response) => {
-        data.set('album' + id, 'coverPicture', response);
+      api.albumCover(id, (response) => {
+        data.set('album' + id, 'cover', response);
         callback(response);
       });
     })(id, callback);

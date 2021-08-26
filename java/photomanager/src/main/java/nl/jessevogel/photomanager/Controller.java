@@ -5,10 +5,10 @@ class Controller {
     private static final int API_PORT = 4321;
     private static final int WEB_PORT = 8080;
 
-    private Commands commands;
-    private Data data;
-    private APIServer apiServer;
-    private WebServer webServer;
+    private final Commands commands;
+    private final Data data;
+    private final APIServer apiServer;
+    private final WebServer webServer;
 
     Controller() {
         // Create sub-controllers

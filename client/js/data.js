@@ -26,9 +26,6 @@ const data = {
 	},
 
 
-
-
-
 	// Misschien deze functie(s) ergens anders
 	updatePeople: (callback) => {
 		// Get list of people
@@ -36,7 +33,7 @@ const data = {
 			for(var i = 0;i < response.length; ++i) {
 				// Store people data
 				data.set('person' + response[i].id, 'name', response[i].name);
-				data.set('person' + response[i].id, 'profilePicture', response[i].profilePicture);
+				data.set('person' + response[i].id, 'picture', response[i].picture);
 
 				// Add to tag options
 				tag.addOption(response[i].name);
@@ -49,9 +46,9 @@ const data = {
 		// Get list of albums
 		api.albums((response) => {
 			for(var i = 0;i < response.length; ++i) {
-				// Store album data
+				// Store album data	
 				data.set('album' + response[i].id, 'title', response[i].title);
-				data.set('album' + response[i].id, 'coverPicture', null);
+				data.set('album' + response[i].id, 'cover', null);
 			}
 			if(callback != undefined) callback();
 		});

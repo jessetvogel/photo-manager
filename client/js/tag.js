@@ -5,93 +5,108 @@ const tag = {
 
 	// Methods
 	open: () => {
-		if($('.tag').length > 0) return;
+		if($('.tag') != undefined) return;
 
-		$('<div>').addClass('tag').append($('<div class="tag-options"></div><div class="tag-input"><input placeholder="tag person"/></div><div class="tagged-people"></div>')).appendTo($('body'));
-		$('.tag').hide().fadeIn(100);
-	  $('.tag-input input')
-	  	.on('input', tag.refreshOptions)
-	  	.keydown(function (event) {
-	  	var key = event.originalEvent.keyCode;
+    document.body.append(create('div', '<div class="tag-options"></div><div class="tag-input"><input placeholder="tag person"/></div><div class="tagged-people"></div>', { 'class': 'tag' }));
+		// $('.tag').hide().fadeIn(100);
+    const tagInput = $('.tag-input input');
+    onInput(tagInput, tag.refreshOptions);
+    onKeyDown(tagInput, (event) => {
+	  	const key = event.keyCode;
 
       // Up / down arrow keys -> Scroll through options
       if(key == 38 || key == 40) {
-        var selected = $('.tag-options .option.selected');
-        if(selected.length == 0) return;
-        var next = (key == 38) ? selected.next() : selected.prev();
-        if(next.length == 0) return;
-        next.addClass('selected');
-        selected.removeClass('selected');
-        event.originalEvent.preventDefault();
+        const selected = $('.tag-options .option.selected');
+        if(selected == undefined) return;
+        const next = (key == 38) ? selected.nextSibling : selected.previousSibling;
+        if(next == null) return;
+        addClass(next, 'selected');
+        removeClass(selected, 'selected');
+        event.preventDefault();
         return;
       }
 
       // Enter key -> tag person
       if(key == 13) {
-        var selected = $('.tag-options .option.selected');
-        if(selected.length == 0) return;
-        tag.tag(selected.text());
-        $('.tag-input input').val('');
-        $('.tag-options').empty();
+        const selected = $('.tag-options .option.selected');
+        if(selected == undefined) return;
+        tag.tag(selected.innerText);
+        tagInput.value = '';
+        clear($('.tag-options'));
         return;
       }
 
       // Control -> new person option
       if(key == 17) {
-      	var name = $('.tag-input input').val();
-      	if(name.length > 0)
-      		$('.tag-options').empty().append($('<div>').addClass('option new selected').text(name));
+      	const name = tagInput.value;
+      	if(name.length > 0) {
+          clear($('.tag-options'));
+          $('.tag-options').append(create('div', name, { 'class': 'option new selected' }));
+        }
       }
     })
-	  .keyup(function (event) {
-	  	var key = event.originalEvent.keyCode;
+    onKeyUp(tagInput, (event) => {
+      const key = event.keyCode;
 
 	  	// Control -> new person option
-	  	if(key == 17) {
-	  		tag.refreshOptions();
-	  	}
+	  	if(key == 17) tag.refreshOptions();
 	  })
-  	.focus();
 
+    tagInput.focus();
     tag.refreshTaggedPeople();
 	},
 
 	close: () => {
-		$('.tag').fadeOut(100, function () { $(this).remove(); });
+		// $('.tag').fadeOut(100, function () { $(this).remove(); });
+    const tag = $('.tag');
+    if(tag != undefined) {
+      tag.remove();
+    }
 	},
 
 	refreshOptions: (event) => {
-		$('.tag-options').empty();
-    var searchTerm = $('.tag-input input').val();
+		clear($('.tag-options'));
+    const searchTerm = $('.tag-input input').value;
     if(searchTerm.length == 0) return;
+
     var count = 0;
     for(var i = 0;i < tag.options.length; ++i) {
-      if(feed.pictures[overlay.feedIndex].tagged.includes(tag.options[i])) continue;
+      if(feed.media[overlay.feedIndex].tagged.includes(tag.options[i])) continue;
       if(searchMatch(tag.options[i], searchTerm)) {
-        var option = $('<div>').addClass('option').text(tag.options[i]).click(function () {
+        const option = create('div', tag.options[i], { 'class': 'option' });
+        onClick(option, () => {
           $('.selected').removeClass('selected');
           $(this).addClass('selected');
-        }).dblclick(function () {
-          console.log('Double clicked ' + tag.options[i]);
+        });
+        onDblClick(option, function () {
+          console.log('Double clicked ' + tag.options[i]); // ???
         });
         $('.tag-options').append(option);
         if((++count) >= 3) break;
       }
     }
-    $('.tag-options .option').first().addClass('selected');
+
+    const firstChild = $('.tag-options').firstChild;
+    if(firstChild != undefined)
+      addClass(firstChild, 'selected');
 	},
 
   refreshTaggedPeople: () => {
-    var tagged = feed.pictures[overlay.feedIndex].tagged;
-    var taggedPeople = $('.tagged-people');
-    taggedPeople.empty();
+    const tagged = feed.media[overlay.feedIndex].tagged;
+    const taggedPeople = $('.tagged-people');
+    clear(taggedPeople);
     for(var i = 0;i < tagged.length; ++i) {
-      ((i) => taggedPeople.append($('<div>').addClass('person').append($('<span>').text(tagged[i])).append($('<span>').addClass('glyphicon glyphicon-remove').click(() => tag.untag(tagged[i])))))(i);
+        const person = tagged[i];
+        const div = create('div', `<span>${person}</span>`, { 'class': 'person' });
+        const remove = create('span', '', { 'class': 'glyphicon glyphicon-remove' });
+        onClick(remove, () => tag.untag(person));
+        div.append(remove);
+        taggedPeople.append(div);
     }
   },
 
   tag: (name) => {
-    var currentPicture = feed.pictures[overlay.feedIndex];
+    var currentPicture = feed.media[overlay.feedIndex];
     api.tag(currentPicture.id, [ name ]);
     currentPicture.tagged.push(name);
     tag.refreshTaggedPeople();
@@ -99,7 +114,7 @@ const tag = {
   },
 
   untag: (name) => {
-    var currentPicture = feed.pictures[overlay.feedIndex];
+    var currentPicture = feed.media[overlay.feedIndex];
     api.untag(currentPicture.id, [ name ]);
     currentPicture.tagged = currentPicture.tagged.filter(e => e !== name);
     tag.refreshTaggedPeople();

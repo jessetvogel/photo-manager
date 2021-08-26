@@ -3,20 +3,21 @@ package nl.jessevogel.photomanager.data;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Person {
+public class Person extends Item {
 
-    public int id;
     public String name;
-    public Set<Picture> pictures;
+    public Set<Medium> media;
 
     public Person() {
-        pictures = new HashSet<>();
+        media = new HashSet<>();
     }
 
+    @Override
     public String serialize() {
         return "" + id + "," + name;
     }
 
+    @Override
     public boolean set(String value) {
         try {
             String[] parts = value.split("(?<!\\\\),");

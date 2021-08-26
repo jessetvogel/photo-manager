@@ -17,8 +17,7 @@
 
 #menu .button {
   flex-grow: 0;
-  transition-property: background-color;
-  transition: 0.4s;
+  transition: background-color 0.4s;
 }
 
 #menu .button:hover {
@@ -31,11 +30,11 @@
   margin: 16px;
 }
 
-.people-tiles .tile, .albums-tiles .tile, .pictures-feed .picture {
+.media-feed .photo, .media-feed .video {
   transition: 0.2s;
 }
 
-.people-tiles .tile:hover, .albums-tiles .tile:hover, .pictures-feed .picture:hover {
+.media-feed .photo:hover, .media-feed .video:hover {
   transform: scale(1.05);
 }
 
@@ -43,6 +42,7 @@
   width: 224px;
   height: 224px;
   margin: 8px;
+  transition: transform 0.2s;
 }
 
 .albums-tiles .tile:hover {
@@ -60,7 +60,7 @@
   height: 192px;
 }
 
-.person-profile-picture, .album-cover-picture {
+.person-picture, .album-cover {
   width: 128px;
   height: 128px;
   border-radius: 64px;
@@ -70,13 +70,13 @@
   font-size: 48px;
 }
 
-.pictures-feed .picture {
+.media-feed .photo, .media-feed .video {
   width: 256px;
   padding-bottom: 256px;
   margin: 6px;
 }
 
-.pictures-feed .picture:hover {
+.media-feed .photo:hover {
   animation: scalein 0.2s forwards;
 }
 
