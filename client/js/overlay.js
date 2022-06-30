@@ -11,7 +11,7 @@ const overlay = {
     divOverlay.append(create('div', '', { 'class': 'overlay-background' }));
     divOverlay.append(create('div', '', { 'class': 'overlay-content' }));
     const overlayExit = create('span', '', { 'class': 'glyphicon glyphicon-remove overlay-exit' });
-    onClick(overlayExit, focus.close());
+    onClick(overlayExit, focus.close);
     divOverlay.append(overlayExit);
     const overlayButtons = create('div', '', { 'class': 'overlay-buttons' });
     const downloadButton = create('div', '<span class="glyphicon glyphicon-download-alt"></span>', { 'class': 'download-button' });

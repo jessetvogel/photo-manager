@@ -1,8 +1,8 @@
 package nl.jessevogel.photomanager;
 
-import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.Java2DFrameConverter;
+import org.jcodec.api.FrameGrab;
+import org.jcodec.common.model.Picture;
+import org.jcodec.scale.AWTUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -18,25 +18,38 @@ class Thumbnailator {
         try {
             net.coobird.thumbnailator.Thumbnails.of(sourcePath).size(MAX_SIZE_SMALL, MAX_SIZE_SMALL).toFile(destinationPath);
             return true;
-        } catch (IOException e) {
-            Log.error("Failed to resize file " + sourcePath);
+        } catch (Exception e) {
+            Log.error("Failed to resize file " + sourcePath + " (" + e.getMessage() + ")");
             return false;
         }
     }
 
+//    boolean thumbnailVideo(String sourcePath, String destinationPath) {
+//        try {
+//            FFmpegFrameGrabber g = new FFmpegFrameGrabber(sourcePath);
+//            g.start();
+//            ImageIO.write(
+//                    downscaleBufferedImage(new Java2DFrameConverter().getBufferedImage(g.grabKeyFrame())),
+//                    "jpg",
+//                    new File(destinationPath)
+//            );
+//            g.stop();
+//            return true;
+//        } catch (IOException e) {
+//            Log.error("Failed to create thumbnail for file " + sourcePath);
+//            return false;
+//        }
+//    }
+
     boolean thumbnailVideo(String sourcePath, String destinationPath) {
         try {
-            FFmpegFrameGrabber g = new FFmpegFrameGrabber(sourcePath);
-            g.start();
-            ImageIO.write(
-                    downscaleBufferedImage(new Java2DFrameConverter().getBufferedImage(g.grabKeyFrame())),
-                    "jpg",
-                    new File(destinationPath)
-            );
-            g.stop();
+            int frameNumber = 0;
+            Picture picture = FrameGrab.getFrameFromFile(new File(sourcePath), frameNumber);
+            BufferedImage bufferedImage = AWTUtil.toBufferedImage(picture);
+            ImageIO.write(bufferedImage, "png", new File(destinationPath));
             return true;
-        } catch (IOException e) {
-            Log.error(e.getMessage());
+        } catch (Exception e) {
+            Log.error("Failed to create thumbnail for file " + sourcePath + " (" + e.getMessage() + ")");
             return false;
         }
     }
