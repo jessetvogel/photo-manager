@@ -53,7 +53,7 @@ const overlay = {
     }
     
     else if(type == 'video') {
-      overlayContent.append(create('video', '<source src="http://localhost:4321/media/' + feed.media[index].id + '" type="video/mp4"></source>', { 'controls': 'true' }));
+      overlayContent.append(create('video', '<source src="http://localhost:4321/media/' + feed.media[index].id + '" type="video/mp4"></source>', { 'controls': 'true', 'loop': 'true' }));
     }
 
     else {
