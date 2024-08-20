@@ -470,7 +470,8 @@ span.text-end-of-feed {
 
 .tagged-people .person {
 	display: flex;
-	justify-content: space-between;
+	justify-content: left;
+	align-items: center;
 	width: 256px;
 	height: 40px;
 	line-height: 40px;
@@ -486,6 +487,14 @@ span.text-end-of-feed {
 	opacity: 1.0;
 }
 
+.tagged-people .person .icon {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	margin-right: 8px;
+	background-size: cover;
+}
+
 .tagged-people .person .remove {
 	font-size: 1rem;
 	cursor: pointer;
@@ -496,6 +505,7 @@ span.text-end-of-feed {
 	background-repeat: no-repeat;
 	width: 40px;
 	height: 40px;
+	margin-left: auto;
 }
 
 input {

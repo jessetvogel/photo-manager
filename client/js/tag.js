@@ -3,23 +3,23 @@ const tag = {
   // Variables
   options: [],
 
-	// Methods
-	open: () => {
-		if($('.tag') != undefined) return;
+  // Methods
+  open: () => {
+    if ($('.tag') != undefined) return;
 
     document.body.append(create('div', '<div class="tag-options"></div><div class="tag-input"><input placeholder="tag person"/></div><div class="tagged-people"></div>', { 'class': 'tag' }));
-		// $('.tag').hide().fadeIn(100);
+    // $('.tag').hide().fadeIn(100);
     const tagInput = $('.tag-input input');
     onInput(tagInput, tag.refreshOptions);
     onKeyDown(tagInput, (event) => {
-	  	const key = event.keyCode;
+      const key = event.keyCode;
 
       // Up / down arrow keys -> Scroll through options
-      if(key == 38 || key == 40) {
+      if (key == 38 || key == 40) {
         const selected = $('.tag-options .option.selected');
-        if(selected == undefined) return;
+        if (selected == undefined) return;
         const next = (key == 38) ? selected.nextSibling : selected.previousSibling;
-        if(next == null) return;
+        if (next == null) return;
         addClass(next, 'selected');
         removeClass(selected, 'selected');
         event.preventDefault();
@@ -27,9 +27,9 @@ const tag = {
       }
 
       // Enter key -> tag person
-      if(key == 13) {
+      if (key == 13) {
         const selected = $('.tag-options .option.selected');
-        if(selected == undefined) return;
+        if (selected == undefined) return;
         tag.tag(selected.innerText);
         tagInput.value = '';
         clear($('.tag-options'));
@@ -37,9 +37,9 @@ const tag = {
       }
 
       // Control -> new person option
-      if(key == 17) {
-      	const name = tagInput.value;
-      	if(name.length > 0) {
+      if (key == 17) {
+        const name = tagInput.value;
+        if (name.length > 0) {
           clear($('.tag-options'));
           $('.tag-options').append(create('div', name, { 'class': 'option new selected' }));
         }
@@ -48,31 +48,31 @@ const tag = {
     onKeyUp(tagInput, (event) => {
       const key = event.keyCode;
 
-	  	// Control -> new person option
-	  	if(key == 17) tag.refreshOptions();
-	  })
+      // Control -> new person option
+      if (key == 17) tag.refreshOptions();
+    })
 
     tagInput.focus();
     tag.refreshTaggedPeople();
-	},
+  },
 
-	close: () => {
-		// $('.tag').fadeOut(100, function () { $(this).remove(); });
+  close: () => {
+    // $('.tag').fadeOut(100, function () { $(this).remove(); });
     const tag = $('.tag');
-    if(tag != undefined) {
+    if (tag != undefined) {
       tag.remove();
     }
-	},
+  },
 
-	refreshOptions: (event) => {
-		clear($('.tag-options'));
+  refreshOptions: (event) => {
+    clear($('.tag-options'));
     const searchTerm = $('.tag-input input').value;
-    if(searchTerm.length == 0) return;
+    if (searchTerm.length == 0) return;
 
     var count = 0;
-    for(var i = 0;i < tag.options.length; ++i) {
-      if(feed.media[overlay.feedIndex].tagged.includes(tag.options[i])) continue;
-      if(searchMatch(tag.options[i], searchTerm)) {
+    for (var i = 0; i < tag.options.length; ++i) {
+      if (feed.media[overlay.feedIndex].tagged.includes(tag.options[i])) continue;
+      if (searchMatch(tag.options[i], searchTerm)) {
         const option = create('div', tag.options[i], { 'class': 'option' });
         onClick(option, () => {
           $('.selected').removeClass('selected');
@@ -82,32 +82,37 @@ const tag = {
           console.log('Double clicked ' + tag.options[i]); // ???
         });
         $('.tag-options').append(option);
-        if((++count) >= 3) break;
+        if ((++count) >= 3) break;
       }
     }
 
     const firstChild = $('.tag-options').firstChild;
-    if(firstChild != undefined)
+    if (firstChild != undefined)
       addClass(firstChild, 'selected');
-	},
+  },
 
   refreshTaggedPeople: () => {
     const tagged = feed.media[overlay.feedIndex].tagged;
     const taggedPeople = $('.tagged-people');
     clear(taggedPeople);
-    for(var i = 0;i < tagged.length; ++i) {
-        const person = tagged[i];
-        const div = create('div', `<span>${person}</span>`, { 'class': 'person' });
-        const remove = create('span', '', { 'class': 'remove' });
-        onClick(remove, () => tag.untag(person));
-        div.append(remove);
-        taggedPeople.append(div);
+    for (var i = 0; i < tagged.length; ++i) {
+      const person = tagged[i];
+      const div = create('div', '', { 'class': 'person' });
+      const icon = create('div', '', { 'class': 'icon' });
+      div.append(icon);
+      const personId = data.nameToId[person];
+      loadProfilePicture(personId, (data) => { icon.style.backgroundImage = `url(${data})`; })
+      div.append(create('span', person));
+      const remove = create('span', '', { 'class': 'remove' });
+      onClick(remove, () => tag.untag(person));
+      div.append(remove);
+      taggedPeople.append(div);
     }
   },
 
   tag: (name) => {
     var currentPicture = feed.media[overlay.feedIndex];
-    api.tag(currentPicture.id, [ name ]);
+    api.tag(currentPicture.id, [name]);
     currentPicture.tagged.push(name);
     tag.refreshTaggedPeople();
     tag.addOption(name);
@@ -115,13 +120,13 @@ const tag = {
 
   untag: (name) => {
     var currentPicture = feed.media[overlay.feedIndex];
-    api.untag(currentPicture.id, [ name ]);
+    api.untag(currentPicture.id, [name]);
     currentPicture.tagged = currentPicture.tagged.filter(e => e !== name);
     tag.refreshTaggedPeople();
   },
 
   addOption: (name) => {
-    if(!tag.options.includes(name))
+    if (!tag.options.includes(name))
       tag.options.push(name);
   }
 
