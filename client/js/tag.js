@@ -98,7 +98,7 @@ const tag = {
     for(var i = 0;i < tagged.length; ++i) {
         const person = tagged[i];
         const div = create('div', `<span>${person}</span>`, { 'class': 'person' });
-        const remove = create('span', '', { 'class': 'glyphicon glyphicon-remove' });
+        const remove = create('span', '', { 'class': 'remove' });
         onClick(remove, () => tag.untag(person));
         div.append(remove);
         taggedPeople.append(div);

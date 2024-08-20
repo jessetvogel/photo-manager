@@ -40,6 +40,6 @@ public class MIMEType {
     public static String getByFile(String path) {
         int i = path.lastIndexOf('.');
         if (i == -1) return getByExtension("");
-        return getByExtension(path.substring(i + 1));
+        return getByExtension(path.substring(i + 1).toLowerCase());
     }
 }

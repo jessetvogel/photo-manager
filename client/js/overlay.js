@@ -10,12 +10,12 @@ const overlay = {
     const divOverlay = create('div', '', { 'class': 'overlay' });
     divOverlay.append(create('div', '', { 'class': 'overlay-background' }));
     divOverlay.append(create('div', '', { 'class': 'overlay-content' }));
-    const overlayExit = create('span', '', { 'class': 'glyphicon glyphicon-remove overlay-exit' });
+    const overlayExit = create('span', '', { 'class': 'overlay-exit' });
     onClick(overlayExit, focus.close);
     divOverlay.append(overlayExit);
     const overlayButtons = create('div', '', { 'class': 'overlay-buttons' });
-    const downloadButton = create('div', '<span class="glyphicon glyphicon-download-alt"></span>', { 'class': 'download-button' });
-    const tagButton = create('div', '<span class="glyphicon glyphicon-tag"></span>', { 'class': 'tag-button' });
+    const downloadButton = create('div', '', { 'class': 'download-button' });
+    const tagButton = create('div', '', { 'class': 'tag-button' });
     onClick(downloadButton, () => { window.open(api.url + '/media/' + feed.media[overlay.feedIndex].id, '_blank'); });
     onClick(tagButton, () => { if(focus.current() == overlay) focus.open(tag); else if(focus.current() == tag) focus.close(); });
     overlayButtons.append(downloadButton);
@@ -49,7 +49,8 @@ const overlay = {
 
     const type = feed.media[index].type;
     if(type == 'photo') {
-      overlayContent.style.backgroundImage = document.querySelectorAll('.media-feed > div')[index].style.backgroundImage;
+      // overlayContent.style.backgroundImage = document.querySelectorAll('.media-feed > div')[index].style.backgroundImage;
+      overlayContent.style.backgroundImage = `url('${api.url}/media/${feed.media[index].id}')`;
     }
     
     else if(type == 'video') {

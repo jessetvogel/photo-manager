@@ -9,6 +9,9 @@ function init() {
   // Load people and albums already once
   data.updatePeople();
   data.updateAlbums();
+
+  // By default, click the albums
+  $('#button-albums').click();
 };
 
 function loadPeople() {
@@ -19,7 +22,7 @@ function loadPeople() {
   const peopleTiles = create('div', '<div class="loading"></div>', { 'class': 'people-tiles' });
 
   // Search bar
-  peopleSearch.append(create('span', '', { 'class': 'glyphicon glyphicon-search' }));
+  const peopleSearchLabel = create('label');
   const peopleSearchInput = create('input', '', { 'placeholder': 'search by name' });
   onInput(peopleSearchInput, function () {
     const searchTerm = peopleSearchInput.value.toLowerCase();
@@ -30,13 +33,15 @@ function loadPeople() {
         tile.style.display = 'none';
     };
   });
-  peopleSearch.append(peopleSearchInput);
+  peopleSearchLabel.append(peopleSearchInput);
+  peopleSearch.append(peopleSearchLabel);
 
   // Set content
   contentPeople.append(peopleSearch);
   contentPeople.append(peopleTiles);
   clear(content);
   content.append(contentPeople);
+  peopleSearchInput.focus();
 
   data.updatePeople(() => {
     // Clear peopleTiles
@@ -74,7 +79,7 @@ function loadAlbums() {
   const albumsTiles = create('div', '<div class="loading"></div>', { 'class': 'albums-tiles' });
 
   // Search bar
-  albumsSearch.append(create('span', '', { 'class': 'glyphicon glyphicon-search' }));
+  const albumSearchLabel = create('label');
   const albumSearchInput = create('input', '', { 'placeholder': 'search by title' });
   onInput(albumSearchInput, () => {
     const searchTerm = albumSearchInput.value.toLowerCase();
@@ -85,7 +90,8 @@ function loadAlbums() {
         tile.style.display = 'none';
     };
   });
-  albumsSearch.append(albumSearchInput);
+  albumSearchLabel.append(albumSearchInput)
+  albumsSearch.append(albumSearchLabel);
 
   // Set content
   contentAlbums.append(albumsSearch);
@@ -93,6 +99,7 @@ function loadAlbums() {
   const content = $('#content');
   clear(content);
   content.append(contentAlbums);
+  albumSearchInput.focus();
 
   // Get list of albums
   data.updateAlbums(() => {

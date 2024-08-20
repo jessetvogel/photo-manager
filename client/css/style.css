@@ -4,15 +4,24 @@
 }
 
 html {
-	-webkit-touch-callout: none; /* iOS Safari */
-	-webkit-user-select: none; /* Safari */
-	-khtml-user-select: none; /* Konqueror HTML */
-	-moz-user-select: none; /* Firefox */
-	-ms-user-select: none; /* Internet Explorer/Edge */
-	user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+	-webkit-touch-callout: none;
+	/* iOS Safari */
+	-webkit-user-select: none;
+	/* Safari */
+	-khtml-user-select: none;
+	/* Konqueror HTML */
+	-moz-user-select: none;
+	/* Firefox */
+	-ms-user-select: none;
+	/* Internet Explorer/Edge */
+	user-select: none;
+	/* Non-prefixed version, currently supported by Chrome and Opera */
+
+	overflow: hidden;
 }
 
-html, body {
+html,
+body {
 	margin: 0px;
 	padding: 0px;
 	width: 100%;
@@ -57,6 +66,7 @@ body {
 	cursor: pointer;
 	text-align: center;
 	color: var(--menu-text-color);
+	font-size: 1rem;
 }
 
 #content {
@@ -69,10 +79,9 @@ body {
 	position: absolute;
 	bottom: 8px;
 	right: 12px;
-}
-
-#health span {
-	margin-left: 8px;
+	display: flex;
+	flex-direction: row;
+	gap: 2px;
 }
 
 #health.healthy {
@@ -83,26 +92,30 @@ body {
 	color: var(--text-color-red);
 }
 
-.content-people, .content-albums {
+.content-people,
+.content-albums {
 	margin-left: auto;
 	margin-right: auto;
 	margin-bottom: 64px;
-	max-width: 720px;
+	/* max-width: 720px; */
 	animation: fadein 0.3s forwards;
 }
 
-.content-person, .content-album {
+.content-person,
+.content-album {
 	height: 100%;
 }
 
-.person-header, .album-header {
+.person-header,
+.album-header {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	height: 128px;
 }
 
-.person-picture, .album-cover {
+.person-picture,
+.album-cover {
 	width: 96px;
 	height: 96px;
 	flex-shrink: 0;
@@ -114,8 +127,9 @@ body {
 	background-position: center;
 }
 
-.person-name, .album-title {
-	font-size: 32px;
+.person-name,
+.album-title {
+	font-size: 2rem;
 	position: relative;
 	top: 4px;
 	margin-left: 16px;
@@ -126,7 +140,7 @@ body {
 }
 
 .media-feed {
-	max-width: 804px;
+	/* max-width: 804px; */
 	margin-left: auto;
 	margin-right: auto;
 	display: flex;
@@ -134,7 +148,8 @@ body {
 	justify-content: center;
 }
 
-.media-feed .photo, .media-feed .video {
+.media-feed .photo,
+.media-feed .video {
 	width: 49%;
 	padding-bottom: 49%;
 	margin: 0.25%;
@@ -178,21 +193,25 @@ body {
 	justify-content: center;
 }
 
-.people-search, .albums-search {
+.people-search,
+.albums-search {
 	text-align: center;
-	height: 128px;
-	line-height: 128px;
+	height: 40px;
+	line-height: 40px;
+	margin: 44px 0px;
 }
 
-.people-search span, .albums-search span {
-	font-size: 32px;
+.people-search span,
+.albums-search span {
+	font-size: 2rem;
 	position: relative;
 	top: 12px;
 	right: 12px;
 	opacity: 0.25;
 }
 
-.people-tiles, .albums-tiles {
+.people-tiles,
+.albums-tiles {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
@@ -229,25 +248,50 @@ body {
 }
 
 .people-tiles .tile .name {
-	font-size: 14px;
+	font-size: 1rem;
 	position: relative;
 	top: 140px;
 }
 
 .albums-tiles .tile .title {
-	font-size: 18px;
+	font-size: 1.5rem;
 	color: white;
 	text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
 }
 
-.people-search input, .albums-search input {
+.people-search input,
+.albums-search input {
 	border: 0;
 	outline: none;
 	line-height: 24px;
-	padding: 8px;
-	width: 256px;
+	padding: 8px 8px 8px 40px;
+	width: 512px;
+	max-width: 100vw;
 	background-color: rgba(255, 255, 255, 0.8);
 	box-shadow: var(--box-shadow);
+}
+
+.people-search label,
+.albums-search label {
+	position: relative;
+	display: inline-block;
+}
+
+.people-search label::before,
+.albums-search label::before {
+	content: '';
+	position: absolute;
+	display: block;
+	left: 0px;
+	top: 0px;
+	width: 40px;
+	height: 40px;
+	background-image: url('../img/search.png');
+	background-size: 50%;
+	background-repeat: no-repeat;
+	background-position: center;
+	opacity: 0.5;
+
 }
 
 ::placeholder {
@@ -263,7 +307,7 @@ body {
 }
 
 span.text-end-of-feed {
-	font-size: 48px;
+	font-size: 3rem;
 	opacity: 0.5;
 }
 
@@ -290,12 +334,19 @@ span.text-end-of-feed {
 
 .overlay-exit {
 	position: fixed;
+	display: block;
+	width: 48px;
+	height: 48px;
 	top: 16px;
 	right: 16px;
 	color: white;
-	font-size: 24px;
 	cursor: pointer;
 	z-index: 5;
+	background-image: url('../img/cross.png');
+	background-size: 50%;
+	background-position: center;
+	background-repeat: no-repeat;
+	filter: invert(1.0);
 }
 
 .overlay-content {
@@ -326,7 +377,8 @@ span.text-end-of-feed {
 	max-height: 100%;
 }
 
-.tag-button, .download-button {
+.tag-button,
+.download-button {
 	width: 48px;
 	height: 48px;
 	text-align: center;
@@ -337,12 +389,21 @@ span.text-end-of-feed {
 	cursor: pointer;
 	margin-top: 16px;
 
-	/* necessary for span glyphicon? */
-	padding-left: 2px;
-	padding-top: 2px;
+	background-size: 40%;
+	background-position: center;
+	background-repeat: no-repeat;
 }
 
-.tag, .tag-button {
+.tag-button {
+	background-image: url('../img/tag.png');
+}
+
+.download-button {
+	background-image: url('../img/download.png');
+}
+
+.tag,
+.tag-button {
 	display: none;
 }
 
@@ -384,6 +445,7 @@ span.text-end-of-feed {
 	padding-left: 8px;
 	padding-right: 8px;
 	background-color: white;
+	box-sizing: border-box;
 }
 
 .tag-options .option.selected {
@@ -410,23 +472,54 @@ span.text-end-of-feed {
 	display: flex;
 	justify-content: space-between;
 	width: 256px;
-    height: 40px;
-    line-height: 40px;
-    padding-left: 8px;
-    padding-right: 8px;
-    color: var(--content-text-color);
-    background-color: white;
-    margin-top: 8px;
-    transition: 0.5s;
-    opacity: 0.5;
+	height: 40px;
+	line-height: 40px;
+	padding-left: 8px;
+	color: var(--content-text-color);
+	background-color: white;
+	margin-top: 8px;
+	transition: 0.5s;
+	opacity: 0.5;
 }
 
 .tagged-people .person:hover {
 	opacity: 1.0;
 }
 
-.tagged-people .person span.glyphicon {
-	font-size: 14px;
-	line-height: 34px;
+.tagged-people .person .remove {
+	font-size: 1rem;
 	cursor: pointer;
+
+	background-image: url('../img/cross.png');
+	background-size: 25%;
+	background-position: center;
+	background-repeat: no-repeat;
+	width: 40px;
+	height: 40px;
+}
+
+input {
+	font-family: museosans;
+	font-size: 1rem;
+}
+
+.signal,
+.no-signal {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	background-position: center;
+	background-size: 80%;
+	background-repeat: no-repeat;
+	transform: translateY(1000px);
+}
+
+.signal {
+	background-image: url('../img/signal.png');
+	filter: drop-shadow(0px -1000px 0 var(--text-color-green));
+}
+
+.no-signal {
+	background-image: url('../img/cross.png');
+	filter: drop-shadow(0px -1000px 0 var(--text-color-red));
 }

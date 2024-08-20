@@ -12,12 +12,12 @@ const status = {
   updateHealth: (healthy) => {
     const health = $('#health');
     if(healthy) {
-      setHTML(health, '<span class="glyphicon glyphicon-signal"></span><span>online</span>');
+      setHTML(health, '<span class="signal"></span><span>online</span>');
       addClass(health, 'healthy');
       removeClass(health, 'unhealthy');
     }
     else {
-      setHTML(health, '<span class="glyphicon glyphicon-exclamation-sign"></span><span>offline</span>');
+      setHTML(health, '<span class="no-signal"></span><span>offline</span>');
       addClass(health, 'unhealthy');
       removeClass(health, 'healthy');
     }

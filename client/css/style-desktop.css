@@ -49,14 +49,10 @@
   transform: scale(1.05);
 }
 
-.albums-tiles .tile .title {
-  font-size: 22px;
-}
-
 .person-header, .album-header {
   margin-left: auto;
   margin-right: auto;
-  max-width: 720px;
+  /* max-width: 720px; */
   height: 192px;
 }
 
@@ -64,10 +60,6 @@
   width: 128px;
   height: 128px;
   border-radius: 64px;
-}
-
-.person-name, .album-title {
-  font-size: 48px;
 }
 
 .media-feed .photo, .media-feed .video {
